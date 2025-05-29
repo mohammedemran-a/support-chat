@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +6,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
 import { Menu, Send, Settings, LogOut, MessageSquare, User } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface Message {
   id: string;
@@ -23,7 +23,8 @@ interface Conversation {
 }
 
 const ChatInterface = () => {
-  const { t, language, toggleLanguage } = useLanguage();
+  const { t, language } = useLanguage();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -98,6 +99,10 @@ const ChatInterface = () => {
     window.location.href = '/';
   };
 
+  const handleGoToSettings = () => {
+    navigate('/settings');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Main Chat Area */}
@@ -116,18 +121,18 @@ const ChatInterface = () => {
                   <SheetTitle>{t('menu') || 'القائمة'}</SheetTitle>
                 </SheetHeader>
                 <div className="mt-6 space-y-4">
-                  {/* Settings */}
+                  {/* Settings and Actions */}
                   <div className="space-y-3">
                     <h3 className="font-medium text-gray-900">
-                      {t('settings') || 'الإعدادات'}
+                      {t('actions') || 'الإجراءات'}
                     </h3>
                     <Button
                       variant="ghost"
                       className="w-full justify-start"
-                      onClick={toggleLanguage}
+                      onClick={handleGoToSettings}
                     >
                       <Settings className="mr-2 h-4 w-4" />
-                      {t('changeLanguage') || 'تغيير اللغة'}
+                      {t('settings') || 'الإعدادات'}
                     </Button>
                     <Button
                       variant="ghost"
