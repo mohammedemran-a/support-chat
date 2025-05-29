@@ -1,11 +1,13 @@
 
 import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const Header = () => {
   const { language, toggleLanguage, t } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   const isRTL = language === 'ar';
 
@@ -14,26 +16,41 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2">
             <div className="w-10 h-10 bg-brand-gradient rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">AS</span>
             </div>
             <span className="font-bold text-xl text-gray-800">
               {isRTL ? 'الدعم العربي' : 'Arab Support'}
             </span>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="/" className="text-gray-700 hover:text-brand-blue-600 transition-colors font-medium">
+            <Link 
+              to="/" 
+              className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium ${
+                location.pathname === '/' ? 'text-brand-blue-600' : ''
+              }`}
+            >
               {t('home')}
-            </a>
-            <a href="/chat" className="text-gray-700 hover:text-brand-blue-600 transition-colors font-medium">
+            </Link>
+            <Link 
+              to="/chat" 
+              className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium ${
+                location.pathname === '/chat' ? 'text-brand-blue-600' : ''
+              }`}
+            >
               {t('chat')}
-            </a>
-            <a href="/faq" className="text-gray-700 hover:text-brand-blue-600 transition-colors font-medium">
+            </Link>
+            <Link 
+              to="/faq" 
+              className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium ${
+                location.pathname === '/faq' ? 'text-brand-blue-600' : ''
+              }`}
+            >
               {t('faq')}
-            </a>
+            </Link>
           </nav>
 
           {/* Actions */}
@@ -50,12 +67,16 @@ const Header = () => {
 
             {/* Auth Buttons */}
             <div className="hidden md:flex items-center space-x-2">
-              <Button variant="ghost" size="sm" className="text-gray-700">
-                {t('login')}
-              </Button>
-              <Button size="sm" className="bg-brand-gradient text-white hover:opacity-90">
-                {t('register')}
-              </Button>
+              <Link to="/login">
+                <Button variant="ghost" size="sm" className="text-gray-700">
+                  {t('login')}
+                </Button>
+              </Link>
+              <Link to="/register">
+                <Button size="sm" className="bg-brand-gradient text-white hover:opacity-90">
+                  {t('register')}
+                </Button>
+              </Link>
             </div>
 
             {/* Mobile Menu Button */}
@@ -76,22 +97,41 @@ const Header = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200">
             <div className="flex flex-col space-y-4">
-              <a href="/" className="text-gray-700 hover:text-brand-blue-600 transition-colors font-medium">
+              <Link 
+                to="/" 
+                className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium ${
+                  location.pathname === '/' ? 'text-brand-blue-600' : ''
+                }`}
+              >
                 {t('home')}
-              </a>
-              <a href="/chat" className="text-gray-700 hover:text-brand-blue-600 transition-colors font-medium">
+              </Link>
+              <Link 
+                to="/chat" 
+                className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium ${
+                  location.pathname === '/chat' ? 'text-brand-blue-600' : ''
+                }`}
+              >
                 {t('chat')}
-              </a>
-              <a href="/faq" className="text-gray-700 hover:text-brand-blue-600 transition-colors font-medium">
+              </Link>
+              <Link 
+                to="/faq" 
+                className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium ${
+                  location.pathname === '/faq' ? 'text-brand-blue-600' : ''
+                }`}
+              >
                 {t('faq')}
-              </a>
+              </Link>
               <div className="flex space-x-2 pt-2">
-                <Button variant="ghost" size="sm" className="text-gray-700 flex-1">
-                  {t('login')}
-                </Button>
-                <Button size="sm" className="bg-brand-gradient text-white hover:opacity-90 flex-1">
-                  {t('register')}
-                </Button>
+                <Link to="/login" className="flex-1">
+                  <Button variant="ghost" size="sm" className="text-gray-700 w-full">
+                    {t('login')}
+                  </Button>
+                </Link>
+                <Link to="/register" className="flex-1">
+                  <Button size="sm" className="bg-brand-gradient text-white hover:opacity-90 w-full">
+                    {t('register')}
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
