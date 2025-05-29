@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { MessageCircle, BookOpen, Star, Users } from 'lucide-react';
+import { MessageCircle, BookOpen } from 'lucide-react';
 
 const HeroSection = () => {
   const { t } = useLanguage();
@@ -44,45 +44,6 @@ const HeroSection = () => {
                 <BookOpen className="mr-3 h-5 w-5" />
                 {t('learnMore')}
               </Button>
-            </div>
-          </div>
-
-          {/* Features Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto animate-slide-in-right">
-            <div className="bg-white/70 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-              <div className="w-12 h-12 bg-brand-blue-gradient rounded-xl flex items-center justify-center mb-4 mx-auto">
-                <MessageCircle className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {t('instantSupport') || 'دعم فوري'}
-              </h3>
-              <p className="text-gray-600 text-sm">
-                {t('instantSupportDesc') || 'احصل على إجابات فورية لاستفساراتك على مدار الساعة'}
-              </p>
-            </div>
-
-            <div className="bg-white/70 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-              <div className="w-12 h-12 bg-brand-purple-gradient rounded-xl flex items-center justify-center mb-4 mx-auto">
-                <Users className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {t('expertTeam') || 'فريق خبراء'}
-              </h3>
-              <p className="text-gray-600 text-sm">
-                {t('expertTeamDesc') || 'فريق متخصص من المهندسين جاهز لمساعدتك'}
-              </p>
-            </div>
-
-            <div className="bg-white/70 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-              <div className="w-12 h-12 bg-brand-green-gradient rounded-xl flex items-center justify-center mb-4 mx-auto">
-                <Star className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {t('topQuality') || 'جودة عالية'}
-              </h3>
-              <p className="text-gray-600 text-sm">
-                {t('topQualityDesc') || 'حلول مخصصة وعالية الجودة لجميع احتياجاتك'}
-              </p>
             </div>
           </div>
         </div>

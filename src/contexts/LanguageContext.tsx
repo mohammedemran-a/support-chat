@@ -62,12 +62,20 @@ const translations = {
     settingsSaved: 'تم حفظ الإعدادات بنجاح',
     settingsDesc: 'قم بتخصيص تجربتك وإدارة حسابك',
     actions: 'الإجراءات',
-    instantSupport: 'دعم فوري',
-    instantSupportDesc: 'احصل على إجابات فورية لاستفساراتك على مدار الساعة',
-    expertTeam: 'فريق خبراء',
-    expertTeamDesc: 'فريق متخصص من المهندسين جاهز لمساعدتك',
-    topQuality: 'جودة عالية',
-    topQualityDesc: 'حلول مخصصة وعالية الجودة لجميع احتياجاتك',
+    // Features Section
+    featuresTitle: 'المميزات',
+    feature1Title: 'دعم فوري على مدار الساعة',
+    feature1Desc: 'احصل على إجابات فورية لاستفساراتك في أي وقت من اليوم',
+    feature2Title: 'ذكاء اصطناعي متقدم',
+    feature2Desc: 'تقنيات حديثة تفهم احتياجاتك وتقدم حلول دقيقة',
+    feature3Title: 'دعم متعدد اللغات',
+    feature3Desc: 'تحدث معنا بالعربية أو الإنجليزية كما تفضل',
+    // Stats Section
+    statsTitle: 'إحصائياتنا',
+    stat1: 'مستخدم راضٍ',
+    stat2: 'مشكلة تم حلها',
+    stat3: 'متوسط وقت الاستجابة',
+    stat4: 'معدل الرضا',
   },
   en: {
     heroTitle: 'We are here to support you',
@@ -122,12 +130,20 @@ const translations = {
     settingsSaved: 'Settings saved successfully',
     settingsDesc: 'Customize your experience and manage your account',
     actions: 'Actions',
-    instantSupport: 'Instant Support',
-    instantSupportDesc: 'Get instant answers to your questions 24/7',
-    expertTeam: 'Expert Team',
-    expertTeamDesc: 'Specialized team of engineers ready to help you',
-    topQuality: 'Top Quality',
-    topQualityDesc: 'Custom and high-quality solutions for all your needs',
+    // Features Section
+    featuresTitle: 'Features',
+    feature1Title: '24/7 Instant Support',
+    feature1Desc: 'Get instant answers to your questions at any time of the day',
+    feature2Title: 'Advanced AI Technology',
+    feature2Desc: 'Modern technology that understands your needs and provides accurate solutions',
+    feature3Title: 'Multi-language Support',
+    feature3Desc: 'Talk to us in Arabic or English as you prefer',
+    // Stats Section
+    statsTitle: 'Our Statistics',
+    stat1: 'Happy Users',
+    stat2: 'Problems Solved',
+    stat3: 'Average Response Time',
+    stat4: 'Satisfaction Rate',
   }
 };
 
