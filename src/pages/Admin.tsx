@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -73,7 +74,7 @@ const AdminDashboard = () => {
 
   const handleAddFAQ = () => {
     if (!newFAQ.question_ar || !newFAQ.answer_ar || !newFAQ.question_en || !newFAQ.answer_en) {
-      toast.error(t('fillAllFields') || 'يرجى ملء جميع الحقول');
+      toast.error(t('fillAllFields'));
       return;
     }
 
@@ -85,22 +86,22 @@ const AdminDashboard = () => {
     setFaqs(prev => [...prev, faq]);
     setNewFAQ({ question_ar: '', answer_ar: '', question_en: '', answer_en: '' });
     setIsAddDialogOpen(false);
-    toast.success(t('faqAdded') || 'تم إضافة السؤال بنجاح');
+    toast.success(t('faqAdded'));
   };
 
   const handleDeleteFAQ = (id: string) => {
     setFaqs(prev => prev.filter(faq => faq.id !== id));
-    toast.success(t('faqDeleted') || 'تم حذف السؤال بنجاح');
+    toast.success(t('faqDeleted'));
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          {t('adminDashboard') || 'لوحة تحكم المشرف'}
+          {t('adminDashboard')}
         </h1>
         <p className="text-gray-600">
-          {t('manageSystemSettings') || 'إدارة إعدادات النظام والمحتوى'}
+          {t('manageSystemSettings')}
         </p>
       </div>
 
@@ -108,15 +109,15 @@ const AdminDashboard = () => {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="users" className="flex items-center space-x-2">
             <Users className="h-4 w-4" />
-            <span>{t('users') || 'المستخدمون'}</span>
+            <span>{t('users')}</span>
           </TabsTrigger>
           <TabsTrigger value="chats" className="flex items-center space-x-2">
             <MessageSquare className="h-4 w-4" />
-            <span>{t('chats') || 'المحادثات'}</span>
+            <span>{t('chats')}</span>
           </TabsTrigger>
           <TabsTrigger value="faqs" className="flex items-center space-x-2">
             <HelpCircle className="h-4 w-4" />
-            <span>{t('faqs') || 'الأسئلة الشائعة'}</span>
+            <span>{t('faqs')}</span>
           </TabsTrigger>
         </TabsList>
 
@@ -124,20 +125,20 @@ const AdminDashboard = () => {
         <TabsContent value="users">
           <Card>
             <CardHeader>
-              <CardTitle>{t('usersManagement') || 'إدارة المستخدمين'}</CardTitle>
+              <CardTitle>{t('usersManagement')}</CardTitle>
               <CardDescription>
-                {t('manageRegisteredUsers') || 'إدارة المستخدمين المسجلين في النظام'}
+                {t('manageRegisteredUsers')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t('name') || 'الاسم'}</TableHead>
-                    <TableHead>{t('email') || 'البريد الإلكتروني'}</TableHead>
-                    <TableHead>{t('joinDate') || 'تاريخ الانضمام'}</TableHead>
-                    <TableHead>{t('status') || 'الحالة'}</TableHead>
-                    <TableHead>{t('actions') || 'الإجراءات'}</TableHead>
+                    <TableHead>{t('name')}</TableHead>
+                    <TableHead>{t('email')}</TableHead>
+                    <TableHead>{t('joinDate')}</TableHead>
+                    <TableHead>{t('status')}</TableHead>
+                    <TableHead>{t('actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -152,7 +153,7 @@ const AdminDashboard = () => {
                             ? 'bg-green-100 text-green-800' 
                             : 'bg-red-100 text-red-800'
                         }`}>
-                          {user.status === 'active' ? (t('active') || 'نشط') : (t('inactive') || 'غير نشط')}
+                          {user.status === 'active' ? t('active') : t('inactive')}
                         </span>
                       </TableCell>
                       <TableCell>
@@ -172,20 +173,20 @@ const AdminDashboard = () => {
         <TabsContent value="chats">
           <Card>
             <CardHeader>
-              <CardTitle>{t('chatsManagement') || 'إدارة المحادثات'}</CardTitle>
+              <CardTitle>{t('chatsManagement')}</CardTitle>
               <CardDescription>
-                {t('viewAllChats') || 'عرض جميع المحادثات التي تمت مع البوت'}
+                {t('viewAllChats')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t('user') || 'المستخدم'}</TableHead>
-                    <TableHead>{t('startTime') || 'وقت البداية'}</TableHead>
-                    <TableHead>{t('endTime') || 'وقت النهاية'}</TableHead>
-                    <TableHead>{t('duration') || 'المدة'}</TableHead>
-                    <TableHead>{t('status') || 'الحالة'}</TableHead>
+                    <TableHead>{t('user')}</TableHead>
+                    <TableHead>{t('startTime')}</TableHead>
+                    <TableHead>{t('endTime')}</TableHead>
+                    <TableHead>{t('duration')}</TableHead>
+                    <TableHead>{t('status')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -201,7 +202,7 @@ const AdminDashboard = () => {
                             ? 'bg-blue-100 text-blue-800' 
                             : 'bg-green-100 text-green-800'
                         }`}>
-                          {chat.status === 'completed' ? (t('completed') || 'مكتملة') : (t('ongoing') || 'جارية')}
+                          {chat.status === 'completed' ? t('completed') : t('ongoing')}
                         </span>
                       </TableCell>
                     </TableRow>
@@ -218,69 +219,69 @@ const AdminDashboard = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>{t('faqsManagement') || 'إدارة الأسئلة الشائعة'}</CardTitle>
+                  <CardTitle>{t('faqsManagement')}</CardTitle>
                   <CardDescription>
-                    {t('manageFAQDatabase') || 'إدارة قاعدة بيانات الأسئلة الشائعة'}
+                    {t('manageFAQDatabase')}
                   </CardDescription>
                 </div>
                 <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                   <DialogTrigger asChild>
                     <Button className="bg-brand-gradient hover:opacity-90">
                       <Plus className="h-4 w-4 mr-2" />
-                      {t('addQuestion') || 'إضافة سؤال'}
+                      {t('addQuestion')}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                      <DialogTitle>{t('addNewQuestion') || 'إضافة سؤال جديد'}</DialogTitle>
+                      <DialogTitle>{t('addNewQuestion')}</DialogTitle>
                       <DialogDescription>
-                        {t('fillQuestionInBothLanguages') || 'املأ السؤال والإجابة باللغتين'}
+                        {t('fillQuestionInBothLanguages')}
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div className="space-y-2">
-                        <Label htmlFor="question_ar">{t('questionArabic') || 'السؤال (عربي)'}</Label>
+                        <Label htmlFor="question_ar">{t('questionArabic')}</Label>
                         <Input
                           id="question_ar"
                           value={newFAQ.question_ar}
                           onChange={(e) => setNewFAQ({...newFAQ, question_ar: e.target.value})}
-                          placeholder={t('enterQuestionArabic') || 'أدخل السؤال باللغة العربية'}
+                          placeholder={t('enterQuestionArabic')}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="answer_ar">{t('answerArabic') || 'الإجابة (عربي)'}</Label>
+                        <Label htmlFor="answer_ar">{t('answerArabic')}</Label>
                         <Textarea
                           id="answer_ar"
                           value={newFAQ.answer_ar}
                           onChange={(e) => setNewFAQ({...newFAQ, answer_ar: e.target.value})}
-                          placeholder={t('enterAnswerArabic') || 'أدخل الإجابة باللغة العربية'}
+                          placeholder={t('enterAnswerArabic')}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="question_en">{t('questionEnglish') || 'السؤال (إنجليزي)'}</Label>
+                        <Label htmlFor="question_en">{t('questionEnglish')}</Label>
                         <Input
                           id="question_en"
                           value={newFAQ.question_en}
                           onChange={(e) => setNewFAQ({...newFAQ, question_en: e.target.value})}
-                          placeholder={t('enterQuestionEnglish') || 'Enter question in English'}
+                          placeholder={t('enterQuestionEnglish')}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="answer_en">{t('answerEnglish') || 'الإجابة (إنجليزي)'}</Label>
+                        <Label htmlFor="answer_en">{t('answerEnglish')}</Label>
                         <Textarea
                           id="answer_en"
                           value={newFAQ.answer_en}
                           onChange={(e) => setNewFAQ({...newFAQ, answer_en: e.target.value})}
-                          placeholder={t('enterAnswerEnglish') || 'Enter answer in English'}
+                          placeholder={t('enterAnswerEnglish')}
                         />
                       </div>
                     </div>
                     <DialogFooter>
                       <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                        {t('cancel') || 'إلغاء'}
+                        {t('cancel')}
                       </Button>
                       <Button onClick={handleAddFAQ} className="bg-brand-gradient hover:opacity-90">
-                        {t('save') || 'حفظ'}
+                        {t('save')}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -291,9 +292,9 @@ const AdminDashboard = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t('questionArabic') || 'السؤال (عربي)'}</TableHead>
-                    <TableHead>{t('questionEnglish') || 'السؤال (إنجليزي)'}</TableHead>
-                    <TableHead>{t('actions') || 'الإجراءات'}</TableHead>
+                    <TableHead>{t('questionArabic')}</TableHead>
+                    <TableHead>{t('questionEnglish')}</TableHead>
+                    <TableHead>{t('actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
