@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Languages, Headphones } from 'lucide-react';
+import { Languages, MessageSquare } from 'lucide-react';
 
 const Header = () => {
   const { language, toggleLanguage, t } = useLanguage();
@@ -19,7 +19,7 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-brand-gradient rounded-xl flex items-center justify-center shadow-lg">
-              <Headphones className="text-white w-5 h-5" />
+              <MessageSquare className="text-white w-5 h-5" />
             </div>
             <span className="font-bold text-xl text-gray-800">
               {isRTL ? 'نظام الدعم الفني' : 'Technical Support System'}

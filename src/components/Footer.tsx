@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Headphones, Mail, Phone, MapPin } from 'lucide-react';
+import { MessageSquare, Mail, Phone, MapPin } from 'lucide-react';
 
 const Footer = () => {
   const { language, t } = useLanguage();
@@ -15,7 +14,7 @@ const Footer = () => {
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-12 h-12 bg-brand-gradient rounded-xl flex items-center justify-center shadow-lg">
-                <Headphones className="text-white w-6 h-6" />
+                <MessageSquare className="text-white w-6 h-6" />
               </div>
               <div>
                 <span className="font-bold text-2xl block">
@@ -94,14 +93,14 @@ const Footer = () => {
               </li>
               <li className="flex items-center space-x-3 text-gray-400 hover:text-white transition-colors duration-300">
                 <Phone className="w-5 h-5 text-brand-blue-400" />
-                <span>+966 11 123 4567</span>
+                <span>+967 783251951</span>
               </li>
               <li className="flex items-center space-x-3 text-gray-400 hover:text-white transition-colors duration-300">
                 <MapPin className="w-5 h-5 text-brand-blue-400" />
                 <span>
                   {isRTL 
-                    ? 'الرياض، المملكة العربية السعودية' 
-                    : 'Riyadh, Saudi Arabia'
+                    ? 'صنعاء، اليمن' 
+                    : 'Sana\'a, Yemen'
                   }
                 </span>
               </li>
@@ -113,7 +112,7 @@ const Footer = () => {
         <div className="border-t border-gray-700 mt-12 pt-8">
           <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
             <p className="text-gray-400 text-center md:text-left">
-              © 2024 {isRTL ? 'نظام الدعم الفني' : 'Technical Support System'}. 
+              © 2025 {isRTL ? 'نظام الدعم الفني' : 'Technical Support System'}. 
               {isRTL ? ' جميع الحقوق محفوظة.' : ' All rights reserved.'}
             </p>
             <div className="flex space-x-6">

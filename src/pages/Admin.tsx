@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Users, MessageSquare, HelpCircle, Plus, Trash2, Edit, Languages } from 'lucide-react';
+import { Users, MessageSquare, HelpCircle, Plus, Trash2, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface User {
@@ -39,7 +39,7 @@ interface FAQ {
 }
 
 const AdminDashboard = () => {
-  const { t, language, toggleLanguage } = useLanguage();
+  const { t, language } = useLanguage();
   const [users] = useState<User[]>([
     { id: '1', name: 'أحمد محمد', email: 'ahmed@example.com', joinDate: '2024-01-15', status: 'active' },
     { id: '2', name: 'فاطمة علي', email: 'fatima@example.com', joinDate: '2024-01-20', status: 'active' },
@@ -95,25 +95,13 @@ const AdminDashboard = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {t('adminDashboard') || 'لوحة تحكم المشرف'}
-          </h1>
-          <p className="text-gray-600">
-            {t('manageSystemSettings') || 'إدارة إعدادات النظام والمحتوى'}
-          </p>
-        </div>
-        
-        {/* Language Toggle */}
-        <Button
-          variant="outline"
-          onClick={toggleLanguage}
-          className="flex items-center space-x-2"
-        >
-          <Languages className="w-4 h-4" />
-          <span>{language === 'ar' ? 'English' : 'العربية'}</span>
-        </Button>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          {t('adminDashboard') || 'لوحة تحكم المشرف'}
+        </h1>
+        <p className="text-gray-600">
+          {t('manageSystemSettings') || 'إدارة إعدادات النظام والمحتوى'}
+        </p>
       </div>
 
       <Tabs defaultValue="users" className="w-full">
