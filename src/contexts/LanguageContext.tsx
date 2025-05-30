@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface LanguageContextProps {
@@ -62,6 +63,8 @@ const translations = {
     settingsSaved: 'تم حفظ الإعدادات بنجاح',
     settingsDesc: 'قم بتخصيص تجربتك وإدارة حسابك',
     actions: 'الإجراءات',
+    adminDashboard: 'لوحة تحكم المشرف',
+    manageSystemSettings: 'إدارة إعدادات النظام والمحتوى',
     // Features Section
     featuresTitle: 'المميزات',
     feature1Title: 'دعم فوري على مدار الساعة',
@@ -130,6 +133,8 @@ const translations = {
     settingsSaved: 'Settings saved successfully',
     settingsDesc: 'Customize your experience and manage your account',
     actions: 'Actions',
+    adminDashboard: 'Admin Dashboard',
+    manageSystemSettings: 'Manage system settings and content',
     // Features Section
     featuresTitle: 'Features',
     feature1Title: '24/7 Instant Support',

@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
-import { Menu, Send, Settings, LogOut, MessageSquare, User } from 'lucide-react';
+import { Menu, Send, Settings, LogOut, MessageSquare, User, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
@@ -103,6 +103,18 @@ const ChatInterface = () => {
     navigate('/settings');
   };
 
+  const handleNewChat = () => {
+    setMessages([
+      {
+        id: '1',
+        text: language === 'ar' ? 'مرحباً! كيف يمكنني مساعدتك اليوم؟' : 'Hello! How can I help you today?',
+        sender: 'bot',
+        timestamp: new Date()
+      }
+    ]);
+    toast.success(language === 'ar' ? 'تم بدء محادثة جديدة' : 'New chat started');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Main Chat Area */}
@@ -121,6 +133,17 @@ const ChatInterface = () => {
                   <SheetTitle>{t('menu') || 'القائمة'}</SheetTitle>
                 </SheetHeader>
                 <div className="mt-6 space-y-4">
+                  {/* New Chat Button */}
+                  <div className="space-y-3">
+                    <Button
+                      onClick={handleNewChat}
+                      className="w-full bg-brand-gradient text-white hover:opacity-90"
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      {language === 'ar' ? 'محادثة جديدة' : 'New Chat'}
+                    </Button>
+                  </div>
+
                   {/* Settings and Actions */}
                   <div className="space-y-3">
                     <h3 className="font-medium text-gray-900">
