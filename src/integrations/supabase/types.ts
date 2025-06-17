@@ -9,7 +9,265 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      admins: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          name: string
+          updated_at: string | null
+          uuid: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          name: string
+          updated_at?: string | null
+          uuid: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string
+          updated_at?: string | null
+          uuid?: string
+        }
+        Relationships: []
+      }
+      conversations: {
+        Row: {
+          created_at: string | null
+          end_time: string | null
+          id: string
+          intent_id: string | null
+          start_time: string | null
+          status: string
+          support_agent_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
+          intent_id?: string | null
+          start_time?: string | null
+          status?: string
+          support_agent_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
+          intent_id?: string | null
+          start_time?: string | null
+          status?: string
+          support_agent_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: false
+            referencedRelation: "intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_support_agent_id_fkey"
+            columns: ["support_agent_id"]
+            isOneToOne: false
+            referencedRelation: "support_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      intents: {
+        Row: {
+          confidence: number
+          created_at: string | null
+          id: string
+          type: string
+        }
+        Insert: {
+          confidence: number
+          created_at?: string | null
+          id?: string
+          type: string
+        }
+        Update: {
+          confidence?: number
+          created_at?: string | null
+          id?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      knowledge_base: {
+        Row: {
+          answer: string
+          created_at: string | null
+          id: string
+          language_code: string
+          question: string
+          updated_at: string | null
+        }
+        Insert: {
+          answer: string
+          created_at?: string | null
+          id?: string
+          language_code: string
+          question: string
+          updated_at?: string | null
+        }
+        Update: {
+          answer?: string
+          created_at?: string | null
+          id?: string
+          language_code?: string
+          question?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_base_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      languages: {
+        Row: {
+          code: string
+          name: string
+        }
+        Insert: {
+          code: string
+          name: string
+        }
+        Update: {
+          code?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string | null
+          id: string
+          sender: string
+          timestamp: string | null
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          sender: string
+          timestamp?: string | null
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          sender?: string
+          timestamp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_agents: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          name: string
+          updated_at: string | null
+          uuid: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          name: string
+          updated_at?: string | null
+          uuid: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string
+          updated_at?: string | null
+          uuid?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          name: string
+          password: string
+          preferred_language_code: string | null
+          updated_at: string | null
+          uuid: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          name: string
+          password: string
+          preferred_language_code?: string | null
+          updated_at?: string | null
+          uuid: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string
+          password?: string
+          preferred_language_code?: string | null
+          updated_at?: string | null
+          uuid?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_preferred_language_code_fkey"
+            columns: ["preferred_language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
