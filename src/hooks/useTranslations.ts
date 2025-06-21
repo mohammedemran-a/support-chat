@@ -35,6 +35,6 @@ export const useTranslations = (languageCode: string) => {
       return translationsMap;
     },
     staleTime: 1000 * 60 * 30, // Cache for 30 minutes
-    cacheTime: 1000 * 60 * 60, // Keep in cache for 1 hour
+    gcTime: 1000 * 60 * 60, // Keep in cache for 1 hour (replaced cacheTime)
   });
 };
