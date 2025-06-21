@@ -3,12 +3,12 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Search } from 'lucide-react';
 
-const FAQContent = () => {
+const FAQ = () => {
   const { t, language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -51,74 +51,66 @@ const FAQContent = () => {
   });
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            {t('faq') || 'الأسئلة الشائعة'}
-          </h1>
-          <p className="text-lg text-gray-600">
-            {t('faqDescription') || 'تجد هنا إجابات للأسئلة الأكثر شيوعاً'}
-          </p>
-        </div>
-
-        {/* Search Box */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                type="text"
-                placeholder={t('searchFAQ') || 'ابحث في الأسئلة الشائعة...'}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1 bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                {t('faq')}
+              </h1>
+              <p className="text-lg text-gray-600">
+                {t('faqDescription') || 'تجد هنا إجابات للأسئلة الأكثر شيوعاً'}
+              </p>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* FAQ Accordion */}
-        <Card>
-          <CardContent className="p-6">
-            <Accordion type="single" collapsible className="w-full">
-              {filteredFAQs.map((faq) => (
-                <AccordionItem key={faq.id} value={faq.id}>
-                  <AccordionTrigger className="text-left">
-                    {language === 'ar' ? faq.question_ar : faq.question_en}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-gray-600">
-                    {language === 'ar' ? faq.answer_ar : faq.answer_en}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+            {/* Search Box */}
+            <Card className="mb-8">
+              <CardContent className="p-6">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    type="text"
+                    placeholder={t('searchFAQ') || 'ابحث في الأسئلة الشائعة...'}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-            {filteredFAQs.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-gray-500">
-                  {t('noResults') || 'لم يتم العثور على نتائج'}
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            {/* FAQ Accordion */}
+            <Card>
+              <CardContent className="p-6">
+                <Accordion type="single" collapsible className="w-full">
+                  {filteredFAQs.map((faq) => (
+                    <AccordionItem key={faq.id} value={faq.id}>
+                      <AccordionTrigger className="text-left">
+                        {language === 'ar' ? faq.question_ar : faq.question_en}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-gray-600">
+                        {language === 'ar' ? faq.answer_ar : faq.answer_en}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+
+                {filteredFAQs.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">
+                      {t('noResults') || 'لم يتم العثور على نتائج'}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </main>
+      <Footer />
     </div>
-  );
-};
-
-const FAQ = () => {
-  return (
-    <LanguageProvider>
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 bg-gradient-to-br from-gray-50 to-gray-100">
-          <FAQContent />
-        </main>
-        <Footer />
-      </div>
-    </LanguageProvider>
   );
 };
 
