@@ -1,14 +1,15 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const LoginForm = () => {
   const { t } = useLanguage();
@@ -19,25 +20,54 @@ const LoginForm = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    // Check if user is already logged in
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate('/chat');
+      }
+    };
+    
+    checkUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        navigate('/chat');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      // TODO: Replace with actual API call
-      console.log('Login data:', formData);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Simulate JWT token storage
-      const mockToken = 'mock-jwt-token-' + Date.now();
-      localStorage.setItem('authToken', mockToken);
-      
+      const { error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        console.error('Login error:', error);
+        if (error.message.includes('Invalid login credentials')) {
+          toast.error('بيانات الدخول غير صحيحة');
+        } else if (error.message.includes('Email not confirmed')) {
+          toast.error('يرجى تأكيد بريدك الإلكتروني أولاً');
+        } else {
+          toast.error(error.message || 'خطأ في تسجيل الدخول');
+        }
+        return;
+      }
+
       toast.success(t('loginSuccess') || 'تم تسجيل الدخول بنجاح');
-      navigate('/chat');
-    } catch (error) {
-      toast.error(t('loginError') || 'خطأ في تسجيل الدخول');
+      // Navigation will be handled by the auth state change listener
+    } catch (error: any) {
+      console.error('Login error:', error);
+      toast.error('خطأ في تسجيل الدخول');
     } finally {
       setIsLoading(false);
     }
@@ -105,15 +135,13 @@ const LoginForm = () => {
 
 const Login = () => {
   return (
-    <LanguageProvider>
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1">
-          <LoginForm />
-        </main>
-        <Footer />
-      </div>
-    </LanguageProvider>
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1">
+        <LoginForm />
+      </main>
+      <Footer />
+    </div>
   );
 };
 

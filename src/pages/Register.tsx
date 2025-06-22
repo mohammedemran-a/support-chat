@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const RegisterForm = () => {
   const { t } = useLanguage();
@@ -29,19 +30,42 @@ const RegisterForm = () => {
       return;
     }
 
+    if (formData.password.length < 6) {
+      toast.error('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      return;
+    }
+
     setIsLoading(true);
     
     try {
-      // TODO: Replace with actual API call
-      console.log('Registration data:', formData);
+      const redirectUrl = `${window.location.origin}/`;
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success(t('registrationSuccess') || 'تم إنشاء الحساب بنجاح');
+      const { error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            name: formData.name
+          }
+        }
+      });
+
+      if (error) {
+        console.error('Registration error:', error);
+        if (error.message.includes('already registered')) {
+          toast.error('هذا البريد الإلكتروني مسجل بالفعل');
+        } else {
+          toast.error(error.message || 'خطأ في إنشاء الحساب');
+        }
+        return;
+      }
+
+      toast.success('تم إنشاء الحساب بنجاح! يرجى التحقق من بريدك الإلكتروني لتأكيد الحساب');
       navigate('/login');
-    } catch (error) {
-      toast.error(t('registrationError') || 'خطأ في إنشاء الحساب');
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      toast.error('خطأ في إنشاء الحساب');
     } finally {
       setIsLoading(false);
     }
@@ -89,6 +113,7 @@ const RegisterForm = () => {
                 value={formData.password}
                 onChange={(e) => setFormData({...formData, password: e.target.value})}
                 required
+                minLength={6}
               />
             </div>
 
@@ -101,6 +126,7 @@ const RegisterForm = () => {
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                 required
+                minLength={6}
               />
             </div>
 
@@ -133,15 +159,13 @@ const RegisterForm = () => {
 
 const Register = () => {
   return (
-    <LanguageProvider>
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1">
-          <RegisterForm />
-        </main>
-        <Footer />
-      </div>
-    </LanguageProvider>
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1">
+        <RegisterForm />
+      </main>
+      <Footer />
+    </div>
   );
 };
 

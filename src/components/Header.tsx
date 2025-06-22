@@ -1,16 +1,30 @@
 
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Languages, MessageSquare } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { Languages, MessageSquare, User as UserIcon, LogOut } from 'lucide-react';
+import { toast } from 'sonner';
 
 const Header = () => {
   const { language, toggleLanguage, t } = useLanguage();
+  const { user, signOut, isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isRTL = language === 'ar';
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success('تم تسجيل الخروج بنجاح');
+      navigate('/');
+    } catch (error) {
+      toast.error('خطأ في تسجيل الخروج');
+    }
+  };
 
   return (
     <header className="bg-white/95 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50 shadow-sm">
@@ -36,14 +50,16 @@ const Header = () => {
             >
               {t('home')}
             </Link>
-            <Link 
-              to="/chat" 
-              className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-brand-blue-50 ${
-                location.pathname === '/chat' ? 'text-brand-blue-600 bg-brand-blue-50' : ''
-              }`}
-            >
-              {t('chat')}
-            </Link>
+            {isAuthenticated && (
+              <Link 
+                to="/chat" 
+                className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-brand-blue-50 ${
+                  location.pathname === '/chat' ? 'text-brand-blue-600 bg-brand-blue-50' : ''
+                }`}
+              >
+                {t('chat')}
+              </Link>
+            )}
             <Link 
               to="/faq" 
               className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-brand-blue-50 ${
@@ -70,16 +86,31 @@ const Header = () => {
 
             {/* Auth Buttons */}
             <div className="hidden md:flex items-center space-x-2">
-              <Link to="/login">
-                <Button variant="ghost" size="sm" className="text-gray-700 hover:bg-gray-100">
-                  {t('login')}
-                </Button>
-              </Link>
-              <Link to="/register">
-                <Button size="sm" className="bg-brand-gradient text-white hover:opacity-90 shadow-md">
-                  {t('register')}
-                </Button>
-              </Link>
+              {isAuthenticated ? (
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 px-3 py-2 bg-gray-100 rounded-lg">
+                    <UserIcon className="w-4 h-4 text-gray-600" />
+                    <span className="text-sm text-gray-700">{user?.email}</span>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-gray-700 hover:bg-gray-100">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    {t('logout')}
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Link to="/login">
+                    <Button variant="ghost" size="sm" className="text-gray-700 hover:bg-gray-100">
+                      {t('login')}
+                    </Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button size="sm" className="bg-brand-gradient text-white hover:opacity-90 shadow-md">
+                      {t('register')}
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -108,14 +139,16 @@ const Header = () => {
               >
                 {t('home')}
               </Link>
-              <Link 
-                to="/chat" 
-                className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-brand-blue-50 ${
-                  location.pathname === '/chat' ? 'text-brand-blue-600 bg-brand-blue-50' : ''
-                }`}
-              >
-                {t('chat')}
-              </Link>
+              {isAuthenticated && (
+                <Link 
+                  to="/chat" 
+                  className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-brand-blue-50 ${
+                    location.pathname === '/chat' ? 'text-brand-blue-600 bg-brand-blue-50' : ''
+                  }`}
+                >
+                  {t('chat')}
+                </Link>
+              )}
               <Link 
                 to="/faq" 
                 className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-brand-blue-50 ${
@@ -125,16 +158,25 @@ const Header = () => {
                 {t('faq')}
               </Link>
               <div className="flex space-x-2 pt-2">
-                <Link to="/login" className="flex-1">
-                  <Button variant="ghost" size="sm" className="text-gray-700 w-full">
-                    {t('login')}
+                {isAuthenticated ? (
+                  <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-gray-700 w-full">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    {t('logout')}
                   </Button>
-                </Link>
-                <Link to="/register" className="flex-1">
-                  <Button size="sm" className="bg-brand-gradient text-white hover:opacity-90 w-full">
-                    {t('register')}
-                  </Button>
-                </Link>
+                ) : (
+                  <>
+                    <Link to="/login" className="flex-1">
+                      <Button variant="ghost" size="sm" className="text-gray-700 w-full">
+                        {t('login')}
+                      </Button>
+                    </Link>
+                    <Link to="/register" className="flex-1">
+                      <Button size="sm" className="bg-brand-gradient text-white hover:opacity-90 w-full">
+                        {t('register')}
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>
