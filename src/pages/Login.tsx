@@ -20,23 +20,46 @@ const LoginForm = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
+  const checkUserRoleAndRedirect = async (userId: string) => {
+    console.log('Checking user role for user ID:', userId);
+    
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role, name, email')
+        .eq('user_id', userId)
+        .single();
+      
+      console.log('Profile query result:', { profile, error });
+      
+      if (error) {
+        console.error('Error fetching profile:', error);
+        // If profile doesn't exist, redirect to chat as default
+        navigate('/chat');
+        return;
+      }
+      
+      if (profile?.role === 'admin') {
+        console.log('User is admin, redirecting to /admin');
+        navigate('/admin');
+      } else {
+        console.log('User is not admin, redirecting to /chat. Role:', profile?.role);
+        navigate('/chat');
+      }
+    } catch (error) {
+      console.error('Error in checkUserRoleAndRedirect:', error);
+      navigate('/chat');
+    }
+  };
+
   useEffect(() => {
     // Check if user is already logged in
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      console.log('Initial session check:', session);
+      
       if (session) {
-        // Check user role and redirect accordingly
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .single();
-        
-        if (profile?.role === 'admin') {
-          navigate('/admin');
-        } else {
-          navigate('/chat');
-        }
+        await checkUserRoleAndRedirect(session.user.id);
       }
     };
     
@@ -44,19 +67,10 @@ const LoginForm = () => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change:', event, session);
+      
       if (event === 'SIGNED_IN' && session) {
-        // Check user role and redirect accordingly
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .single();
-        
-        if (profile?.role === 'admin') {
-          navigate('/admin');
-        } else {
-          navigate('/chat');
-        }
+        await checkUserRoleAndRedirect(session.user.id);
       }
     });
 
@@ -68,6 +82,8 @@ const LoginForm = () => {
     setIsLoading(true);
     
     try {
+      console.log('Attempting login for:', formData.email);
+      
       const { error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
