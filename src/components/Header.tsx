@@ -4,12 +4,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
-import { Languages, MessageSquare, User as UserIcon, LogOut } from 'lucide-react';
+import { useCurrentUserProfile } from '@/hooks/useProfiles';
+import { Languages, MessageSquare, User as UserIcon, LogOut, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Header = () => {
   const { language, toggleLanguage, t } = useLanguage();
   const { user, signOut, isAuthenticated } = useAuth();
+  const { data: userProfile } = useCurrentUserProfile();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -60,6 +62,17 @@ const Header = () => {
                 {t('chat')}
               </Link>
             )}
+            {userProfile?.role === 'admin' && (
+              <Link 
+                to="/admin" 
+                className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-brand-blue-50 flex items-center space-x-2 ${
+                  location.pathname === '/admin' ? 'text-brand-blue-600 bg-brand-blue-50' : ''
+                }`}
+              >
+                <Shield className="w-4 h-4" />
+                <span>لوحة الإدارة</span>
+              </Link>
+            )}
             <Link 
               to="/faq" 
               className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-brand-blue-50 ${
@@ -91,6 +104,9 @@ const Header = () => {
                   <div className="flex items-center space-x-2 px-3 py-2 bg-gray-100 rounded-lg">
                     <UserIcon className="w-4 h-4 text-gray-600" />
                     <span className="text-sm text-gray-700">{user?.email}</span>
+                    {userProfile?.role === 'admin' && (
+                      <Shield className="w-4 h-4 text-red-600" title="مشرف" />
+                    )}
                   </div>
                   <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-gray-700 hover:bg-gray-100">
                     <LogOut className="w-4 h-4 mr-2" />
@@ -147,6 +163,17 @@ const Header = () => {
                   }`}
                 >
                   {t('chat')}
+                </Link>
+              )}
+              {userProfile?.role === 'admin' && (
+                <Link 
+                  to="/admin" 
+                  className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-brand-blue-50 flex items-center space-x-2 ${
+                    location.pathname === '/admin' ? 'text-brand-blue-600 bg-brand-blue-50' : ''
+                  }`}
+                >
+                  <Shield className="w-4 h-4" />
+                  <span>لوحة الإدارة</span>
                 </Link>
               )}
               <Link 
