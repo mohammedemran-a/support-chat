@@ -105,7 +105,7 @@ const Header = () => {
                     <UserIcon className="w-4 h-4 text-gray-600" />
                     <span className="text-sm text-gray-700">{user?.email}</span>
                     {userProfile?.role === 'admin' && (
-                      <Shield className="w-4 h-4 text-red-600" title="مشرف" />
+                      <Shield className="w-4 h-4 text-red-600" />
                     )}
                   </div>
                   <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-gray-700 hover:bg-gray-100">
