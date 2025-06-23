@@ -37,22 +37,34 @@ export const useCurrentUserProfile = () => {
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       
+      console.log('useCurrentUserProfile - Current auth user:', user?.id);
+      
       if (!user) {
+        console.log('useCurrentUserProfile - No authenticated user found');
         return null;
       }
 
+      console.log('useCurrentUserProfile - Fetching profile for user:', user.id);
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
         .single();
 
+      console.log('useCurrentUserProfile - Profile query result:', { data, error });
+
       if (error) {
+        console.error('useCurrentUserProfile - Error fetching profile:', error);
         throw error;
       }
 
+      console.log('useCurrentUserProfile - Profile data:', data);
       return data as UserProfile;
     },
+    enabled: true,
+    retry: 3,
+    retryDelay: 1000,
   });
 };
 
@@ -76,6 +88,7 @@ export const useUpdateUserRole = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profiles'] });
+      queryClient.invalidateQueries({ queryKey: ['current-user-profile'] });
       toast.success('تم تحديث دور المستخدم بنجاح');
     },
     onError: (error: any) => {

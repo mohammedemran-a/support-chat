@@ -21,33 +21,40 @@ const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const checkUserRoleAndRedirect = async (userId: string) => {
-    console.log('Checking user role for user ID:', userId);
+    console.log('🔍 checkUserRoleAndRedirect - Checking user role for:', userId);
     
     try {
+      // Add a small delay to ensure the profile is created by the trigger
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('role, name, email')
+        .select('role, name, email, user_id')
         .eq('user_id', userId)
         .single();
       
-      console.log('Profile query result:', { profile, error });
+      console.log('🔍 checkUserRoleAndRedirect - Profile query result:', { profile, error });
       
       if (error) {
-        console.error('Error fetching profile:', error);
+        console.error('❌ checkUserRoleAndRedirect - Error fetching profile:', error);
         // If profile doesn't exist, redirect to chat as default
+        console.log('➡️ checkUserRoleAndRedirect - No profile found, redirecting to /chat');
         navigate('/chat');
         return;
       }
       
+      console.log('✅ checkUserRoleAndRedirect - Profile found:', profile);
+      console.log('🔑 checkUserRoleAndRedirect - User role:', profile.role);
+      
       if (profile?.role === 'admin') {
-        console.log('User is admin, redirecting to /admin');
+        console.log('👑 checkUserRoleAndRedirect - User is admin, redirecting to /admin');
         navigate('/admin');
       } else {
-        console.log('User is not admin, redirecting to /chat. Role:', profile?.role);
+        console.log('👤 checkUserRoleAndRedirect - User is not admin, redirecting to /chat. Role:', profile?.role);
         navigate('/chat');
       }
     } catch (error) {
-      console.error('Error in checkUserRoleAndRedirect:', error);
+      console.error('💥 checkUserRoleAndRedirect - Error in function:', error);
       navigate('/chat');
     }
   };
@@ -55,10 +62,12 @@ const LoginForm = () => {
   useEffect(() => {
     // Check if user is already logged in
     const checkUser = async () => {
+      console.log('🚀 Login useEffect - Checking initial session');
       const { data: { session } } = await supabase.auth.getSession();
-      console.log('Initial session check:', session);
+      console.log('🚀 Login useEffect - Initial session:', session?.user?.id);
       
       if (session) {
+        console.log('✅ Login useEffect - User already logged in, checking role');
         await checkUserRoleAndRedirect(session.user.id);
       }
     };
@@ -67,9 +76,10 @@ const LoginForm = () => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event, session);
+      console.log('🔄 Login Auth state change:', event, session?.user?.id);
       
       if (event === 'SIGNED_IN' && session) {
+        console.log('✅ Login Auth - User signed in, checking role');
         await checkUserRoleAndRedirect(session.user.id);
       }
     });
@@ -82,15 +92,17 @@ const LoginForm = () => {
     setIsLoading(true);
     
     try {
-      console.log('Attempting login for:', formData.email);
+      console.log('🔐 Login attempt for:', formData.email);
       
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
 
+      console.log('🔐 Login result:', { user: data.user?.id, error });
+
       if (error) {
-        console.error('Login error:', error);
+        console.error('❌ Login error:', error);
         if (error.message.includes('Invalid login credentials')) {
           toast.error('بيانات الدخول غير صحيحة');
         } else if (error.message.includes('Email not confirmed')) {
@@ -101,10 +113,13 @@ const LoginForm = () => {
         return;
       }
 
-      toast.success(t('loginSuccess') || 'تم تسجيل الدخول بنجاح');
-      // Navigation will be handled by the auth state change listener
+      if (data.user) {
+        console.log('✅ Login successful for user:', data.user.id);
+        toast.success(t('loginSuccess') || 'تم تسجيل الدخول بنجاح');
+        // Role check and navigation will be handled by the auth state change listener
+      }
     } catch (error: any) {
-      console.error('Login error:', error);
+      console.error('💥 Login error:', error);
       toast.error('خطأ في تسجيل الدخول');
     } finally {
       setIsLoading(false);

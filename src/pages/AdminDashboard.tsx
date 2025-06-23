@@ -11,23 +11,32 @@ import { Shield, AlertTriangle } from 'lucide-react';
 
 const AdminDashboard = () => {
   const { isAuthenticated, loading: authLoading, user } = useAuth();
-  const { data: userProfile, isLoading: profileLoading } = useCurrentUserProfile();
+  const { data: userProfile, isLoading: profileLoading, error: profileError } = useCurrentUserProfile();
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('AdminDashboard - Auth status:', { isAuthenticated, authLoading, userId: user?.id });
-    console.log('AdminDashboard - Profile:', { userProfile, profileLoading });
+    console.log('🏛️ AdminDashboard - Component mounted');
+    console.log('🏛️ AdminDashboard - Auth status:', { isAuthenticated, authLoading, userId: user?.id });
+    console.log('🏛️ AdminDashboard - Profile:', { userProfile, profileLoading, profileError });
     
     if (!authLoading && !profileLoading) {
       if (!isAuthenticated) {
-        console.log('AdminDashboard - User not authenticated, redirecting to login');
+        console.log('❌ AdminDashboard - User not authenticated, redirecting to login');
         navigate('/login');
-      } else if (userProfile && userProfile.role !== 'admin') {
-        console.log('AdminDashboard - User is not admin, role:', userProfile.role);
+      } else if (userProfile) {
+        console.log('🔍 AdminDashboard - Checking user role:', userProfile.role);
+        if (userProfile.role !== 'admin') {
+          console.log('🚫 AdminDashboard - User is not admin, role:', userProfile.role);
+          navigate('/chat');
+        } else {
+          console.log('✅ AdminDashboard - User is admin, showing admin panel');
+        }
+      } else if (profileError) {
+        console.error('❌ AdminDashboard - Profile error:', profileError);
         navigate('/chat');
       }
     }
-  }, [isAuthenticated, authLoading, userProfile, profileLoading, navigate, user]);
+  }, [isAuthenticated, authLoading, userProfile, profileLoading, profileError, navigate, user]);
 
   if (authLoading || profileLoading) {
     return (
@@ -73,6 +82,7 @@ const AdminDashboard = () => {
               <h2 className="text-xl font-bold mb-2">غير مصرح لك</h2>
               <p className="text-gray-600">ليس لديك صلاحية للوصول إلى لوحة الإدارة</p>
               <p className="text-sm text-gray-500 mt-2">دورك الحالي: {userProfile?.role || 'غير محدد'}</p>
+              <p className="text-xs text-gray-400 mt-1">معرف المستخدم: {user?.id}</p>
             </CardContent>
           </Card>
         </main>
