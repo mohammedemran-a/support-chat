@@ -1,10 +1,12 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
-import { Menu, Send, Settings, LogOut, MessageSquare, User, Plus } from 'lucide-react';
+import { useChatBot } from '@/hooks/useChatBot';
+import { Menu, Send, Settings, LogOut, MessageSquare, User, Plus, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
@@ -25,29 +27,30 @@ interface Conversation {
 const ChatInterface = () => {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
+  const { generateBotResponse, isTyping } = useChatBot(language);
+  
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: language === 'ar' ? 'مرحباً! كيف يمكنني مساعدتك اليوم؟' : 'Hello! How can I help you today?',
+      text: t('chatWelcome'),
       sender: 'bot',
       timestamp: new Date()
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const conversations: Conversation[] = [
     {
       id: '1',
-      title: language === 'ar' ? 'مشكلة في الاتصال' : 'Connection Issue',
+      title: language === 'ar' ? 'استفسار عن القيود المحاسبية' : 'Accounting Entries Inquiry',
       lastMessage: language === 'ar' ? 'شكراً لك على المساعدة' : 'Thank you for the help',
       timestamp: new Date(Date.now() - 86400000)
     },
     {
       id: '2',
-      title: language === 'ar' ? 'استفسار عن الخدمة' : 'Service Inquiry',
-      lastMessage: language === 'ar' ? 'هل يمكن تفعيل الخدمة؟' : 'Can you activate the service?',
+      title: language === 'ar' ? 'حساب الضريبة المضافة' : 'VAT Calculation',
+      lastMessage: language === 'ar' ? 'كيف أحسب الضريبة؟' : 'How do I calculate VAT?',
       timestamp: new Date(Date.now() - 172800000)
     }
   ];
@@ -60,9 +63,18 @@ const ChatInterface = () => {
     scrollToBottom();
   }, [messages]);
 
+  // تحديث رسالة الترحيب عند تغيير اللغة
+  useEffect(() => {
+    setMessages(prev => prev.map((msg, index) => 
+      index === 0 && msg.sender === 'bot' 
+        ? { ...msg, text: t('chatWelcome') }
+        : msg
+    ));
+  }, [language, t]);
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim() || isTyping) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -73,21 +85,23 @@ const ChatInterface = () => {
 
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
-    setIsTyping(true);
 
-    // Simulate bot response
-    setTimeout(() => {
-      const botResponse: Message = {
+    // إنتاج رد ذكي من البوت
+    try {
+      const botResponse = await generateBotResponse(inputMessage);
+      setMessages(prev => [...prev, botResponse]);
+    } catch (error) {
+      console.error('Error generating bot response:', error);
+      const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: language === 'ar' ? 
-          'شكراً لك على رسالتك. سأقوم بمساعدتك في حل هذه المسألة.' :
-          'Thank you for your message. I will help you solve this issue.',
+        text: language === 'ar' 
+          ? 'عذراً، حدث خطأ في النظام. يرجى المحاولة مرة أخرى.'
+          : 'Sorry, a system error occurred. Please try again.',
         sender: 'bot',
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, botResponse]);
-      setIsTyping(false);
-    }, 2000);
+      setMessages(prev => [...prev, errorMessage]);
+    }
   };
 
   const handleTransferToHuman = () => {
@@ -107,12 +121,12 @@ const ChatInterface = () => {
     setMessages([
       {
         id: '1',
-        text: language === 'ar' ? 'مرحباً! كيف يمكنني مساعدتك اليوم؟' : 'Hello! How can I help you today?',
+        text: t('chatWelcome'),
         sender: 'bot',
         timestamp: new Date()
       }
     ]);
-    toast.success(language === 'ar' ? 'تم بدء محادثة جديدة' : 'New chat started');
+    toast.success(t('newChatStarted'));
   };
 
   return (
@@ -201,7 +215,7 @@ const ChatInterface = () => {
             
             <div>
               <h1 className="text-lg font-semibold text-gray-900">
-                {t('technicalSupport') || 'الدعم الفني'}
+                {t('technicalSupport') || 'المساعد المحاسبي الذكي'}
               </h1>
               <p className="text-sm text-gray-500">
                 {t('onlineNow') || 'متصل الآن'}
@@ -234,7 +248,7 @@ const ChatInterface = () => {
                     : 'bg-white border border-gray-200 text-gray-900'
                 }`}
               >
-                <p className="text-sm">{message.text}</p>
+                <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                 <p className={`text-xs mt-1 ${
                   message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
                 }`}>
@@ -247,10 +261,9 @@ const ChatInterface = () => {
           {isTyping && (
             <div className="flex justify-start">
               <div className="bg-white border border-gray-200 rounded-lg px-4 py-2">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                <div className="flex items-center space-x-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                  <span className="text-sm text-gray-500">{t('botTyping')}</span>
                 </div>
               </div>
             </div>
@@ -266,6 +279,7 @@ const ChatInterface = () => {
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder={t('typeMessage') || 'اكتب رسالتك هنا...'}
               className="flex-1"
+              disabled={isTyping}
             />
             <Button 
               type="submit" 
