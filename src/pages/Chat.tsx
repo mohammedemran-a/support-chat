@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
 import { useChatBot } from '@/hooks/useChatBot';
 import { Menu, Send, Settings, LogOut, MessageSquare, User, Plus, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface Message {
   id: string;
@@ -24,10 +24,10 @@ interface Conversation {
   timestamp: Date;
 }
 
-const ChatInterface = () => {
-  const { t, language } = useLanguage();
+const Chat = () => {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { generateBotResponse, isTyping } = useChatBot(language);
+  const { generateBotResponse, isTyping } = useChatBot(i18n.language);
   
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -43,14 +43,14 @@ const ChatInterface = () => {
   const conversations: Conversation[] = [
     {
       id: '1',
-      title: language === 'ar' ? 'استفسار عن القيود المحاسبية' : 'Accounting Entries Inquiry',
-      lastMessage: language === 'ar' ? 'شكراً لك على المساعدة' : 'Thank you for the help',
+      title: i18n.language === 'ar' ? 'استفسار عن القيود المحاسبية' : 'Accounting Entries Inquiry',
+      lastMessage: i18n.language === 'ar' ? 'شكراً لك على المساعدة' : 'Thank you for the help',
       timestamp: new Date(Date.now() - 86400000)
     },
     {
       id: '2',
-      title: language === 'ar' ? 'حساب الضريبة المضافة' : 'VAT Calculation',
-      lastMessage: language === 'ar' ? 'كيف أحسب الضريبة؟' : 'How do I calculate VAT?',
+      title: i18n.language === 'ar' ? 'حساب الضريبة المضافة' : 'VAT Calculation',
+      lastMessage: i18n.language === 'ar' ? 'كيف أحسب الضريبة؟' : 'How do I calculate VAT?',
       timestamp: new Date(Date.now() - 172800000)
     }
   ];
@@ -70,7 +70,7 @@ const ChatInterface = () => {
         ? { ...msg, text: t('chatWelcome') }
         : msg
     ));
-  }, [language, t]);
+  }, [i18n.language, t]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,7 +94,7 @@ const ChatInterface = () => {
       console.error('Error generating bot response:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: language === 'ar' 
+        text: i18n.language === 'ar' 
           ? 'عذراً، حدث خطأ في النظام. يرجى المحاولة مرة أخرى.'
           : 'Sorry, a system error occurred. Please try again.',
         sender: 'bot',
@@ -105,7 +105,7 @@ const ChatInterface = () => {
   };
 
   const handleTransferToHuman = () => {
-    toast.success(t('transferringToHuman') || 'جاري التحويل إلى موظف بشري...');
+    toast.success(t('transferringToHuman'));
   };
 
   const handleLogout = () => {
@@ -144,7 +144,7 @@ const ChatInterface = () => {
               </SheetTrigger>
               <SheetContent side="left" className="w-80">
                 <SheetHeader>
-                  <SheetTitle>{t('menu') || 'القائمة'}</SheetTitle>
+                  <SheetTitle>{t('menu')}</SheetTitle>
                 </SheetHeader>
                 <div className="mt-6 space-y-4">
                   {/* New Chat Button */}
@@ -154,14 +154,14 @@ const ChatInterface = () => {
                       className="w-full bg-brand-gradient text-white hover:opacity-90"
                     >
                       <Plus className="mr-2 h-4 w-4" />
-                      {language === 'ar' ? 'محادثة جديدة' : 'New Chat'}
+                      {i18n.language === 'ar' ? 'محادثة جديدة' : 'New Chat'}
                     </Button>
                   </div>
 
                   {/* Settings and Actions */}
                   <div className="space-y-3">
                     <h3 className="font-medium text-gray-900">
-                      {t('actions') || 'الإجراءات'}
+                      {t('actions')}
                     </h3>
                     <Button
                       variant="ghost"
@@ -169,7 +169,7 @@ const ChatInterface = () => {
                       onClick={handleGoToSettings}
                     >
                       <Settings className="mr-2 h-4 w-4" />
-                      {t('settings') || 'الإعدادات'}
+                      {t('settings')}
                     </Button>
                     <Button
                       variant="ghost"
@@ -177,14 +177,14 @@ const ChatInterface = () => {
                       onClick={handleLogout}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
-                      {t('logout') || 'تسجيل الخروج'}
+                      {t('logout')}
                     </Button>
                   </div>
 
                   {/* Previous Conversations */}
                   <div className="space-y-3">
                     <h3 className="font-medium text-gray-900">
-                      {t('previousChats') || 'المحادثات السابقة'}
+                      {t('previousChats')}
                     </h3>
                     <div className="space-y-2">
                       {conversations.map((conv) => (
@@ -215,10 +215,10 @@ const ChatInterface = () => {
             
             <div>
               <h1 className="text-lg font-semibold text-gray-900">
-                {t('technicalSupport') || 'المساعد المحاسبي الذكي'}
+                {t('technicalSupport')}
               </h1>
               <p className="text-sm text-gray-500">
-                {t('onlineNow') || 'متصل الآن'}
+                {t('onlineNow')}
               </p>
             </div>
           </div>
@@ -230,7 +230,7 @@ const ChatInterface = () => {
             className="text-brand-blue-600 border-brand-blue-600 hover:bg-brand-blue-50"
           >
             <User className="mr-2 h-4 w-4" />
-            {t('transferToHuman') || 'التحويل إلى موظف بشري'}
+            {t('transferToHuman')}
           </Button>
         </div>
 
@@ -277,7 +277,7 @@ const ChatInterface = () => {
             <Input
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              placeholder={t('typeMessage') || 'اكتب رسالتك هنا...'}
+              placeholder={t('typeMessage')}
               className="flex-1"
               disabled={isTyping}
             />
@@ -292,14 +292,6 @@ const ChatInterface = () => {
         </div>
       </div>
     </div>
-  );
-};
-
-const Chat = () => {
-  return (
-    <LanguageProvider>
-      <ChatInterface />
-    </LanguageProvider>
   );
 };
 

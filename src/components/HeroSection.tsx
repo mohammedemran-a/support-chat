@@ -1,11 +1,11 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { MessageCircle, BookOpen } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const HeroSection = () => {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   return (
     <section className="relative bg-gradient-to-br from-brand-blue-50 via-brand-purple-50 to-brand-green-50 py-20 lg:py-28 overflow-hidden">

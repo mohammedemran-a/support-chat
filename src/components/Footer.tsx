@@ -1,10 +1,11 @@
+
 import React from 'react';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { MessageSquare, Mail, Phone, MapPin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Footer = () => {
-  const { language, t } = useLanguage();
-  const isRTL = language === 'ar';
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
 
   return (
     <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">

@@ -2,21 +2,27 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrentUserProfile } from '@/hooks/useProfiles';
 import { Languages, MessageSquare, User as UserIcon, LogOut, Shield } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 const Header = () => {
-  const { language, toggleLanguage, t } = useLanguage();
+  const { t, i18n } = useTranslation();
   const { user, signOut, isAuthenticated } = useAuth();
   const { data: userProfile } = useCurrentUserProfile();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isRTL = language === 'ar';
+  const currentLanguage = i18n.language;
+  const isRTL = currentLanguage === 'ar';
+
+  const toggleLanguage = () => {
+    const newLanguage = currentLanguage === 'ar' ? 'en' : 'ar';
+    i18n.changeLanguage(newLanguage);
+  };
 
   const handleSignOut = async () => {
     try {
@@ -93,8 +99,8 @@ const Header = () => {
               className="flex items-center space-x-2 text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-brand-blue-300"
             >
               <Languages className="w-4 h-4" />
-              <span className="hidden sm:inline">{language === 'ar' ? 'English' : 'العربية'}</span>
-              <span className="sm:hidden">{language === 'ar' ? 'EN' : 'ع'}</span>
+              <span className="hidden sm:inline">{currentLanguage === 'ar' ? 'English' : 'العربية'}</span>
+              <span className="sm:hidden">{currentLanguage === 'ar' ? 'EN' : 'ع'}</span>
             </Button>
 
             {/* Auth Buttons */}

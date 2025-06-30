@@ -3,21 +3,21 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { useKnowledgeBase, useSearchKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Search, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const FAQ = () => {
-  const { t, language } = useLanguage();
+  const { t, i18n } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
 
   // جلب جميع الأسئلة الشائعة من قاعدة البيانات
-  const { data: allFaqs = [], isLoading: loadingAll } = useKnowledgeBase(language);
+  const { data: allFaqs = [], isLoading: loadingAll } = useKnowledgeBase(i18n.language);
   
   // البحث في قاعدة البيانات
-  const { data: searchResults = [], isLoading: loadingSearch } = useSearchKnowledgeBase(searchTerm, language);
+  const { data: searchResults = [], isLoading: loadingSearch } = useSearchKnowledgeBase(searchTerm, i18n.language);
 
   // استخدام نتائج البحث إذا كان هناك بحث، وإلا استخدام جميع الأسئلة
   const displayedFaqs = searchTerm.trim() ? searchResults : allFaqs;
@@ -63,7 +63,7 @@ const FAQ = () => {
                 {isLoading ? (
                   <div className="text-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-brand-blue-600" />
-                    <p className="text-gray-500">جاري التحميل...</p>
+                    <p className="text-gray-500">{t('loading')}</p>
                   </div>
                 ) : (
                   <>

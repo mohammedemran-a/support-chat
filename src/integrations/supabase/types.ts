@@ -140,29 +140,6 @@ export type Database = {
           question?: string
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "knowledge_base_language_code_fkey"
-            columns: ["language_code"]
-            isOneToOne: false
-            referencedRelation: "languages"
-            referencedColumns: ["code"]
-          },
-        ]
-      }
-      languages: {
-        Row: {
-          code: string
-          name: string
-        }
-        Insert: {
-          code: string
-          name: string
-        }
-        Update: {
-          code?: string
-          name?: string
-        }
         Relationships: []
       }
       messages: {
@@ -257,41 +234,6 @@ export type Database = {
         }
         Relationships: []
       }
-      translations: {
-        Row: {
-          created_at: string | null
-          id: string
-          key: string
-          language_code: string
-          updated_at: string | null
-          value: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          key: string
-          language_code: string
-          updated_at?: string | null
-          value: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          key?: string
-          language_code?: string
-          updated_at?: string | null
-          value?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "translations_language_code_fkey"
-            columns: ["language_code"]
-            isOneToOne: false
-            referencedRelation: "languages"
-            referencedColumns: ["code"]
-          },
-        ]
-      }
       users: {
         Row: {
           created_at: string | null
@@ -323,15 +265,7 @@ export type Database = {
           updated_at?: string | null
           uuid?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "users_preferred_language_code_fkey"
-            columns: ["preferred_language_code"]
-            isOneToOne: false
-            referencedRelation: "languages"
-            referencedColumns: ["code"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
