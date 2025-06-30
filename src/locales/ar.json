@@ -71,5 +71,15 @@
   "faqDescription": "ابحث عن إجابات للأسئلة الشائعة",
   "chatWelcome": "أهلاً بك! كيف يمكنني مساعدتك اليوم؟",
   "botTyping": "البوت يكتب...",
-  "newChatStarted": "تم بدء محادثة جديدة"
+  "newChatStarted": "تم بدء محادثة جديدة",
+  "name": "الاسم",
+  "enterName": "أدخل الاسم",
+  "confirmPassword": "تأكيد كلمة المرور",
+  "createAccount": "إنشاء حساب جديد",
+  "alreadyHaveAccount": "لديك حساب بالفعل؟",
+  "passwordMismatch": "كلمات المرور غير متطابقة",
+  "passwordMinLength": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+  "emailAlreadyRegistered": "هذا البريد الإلكتروني مسجل بالفعل",
+  "registrationError": "خطأ في إنشاء الحساب",
+  "registrationSuccess": "تم إنشاء الحساب بنجاح! يرجى التحقق من بريدك الإلكتروني لتأكيد الحساب"
 }

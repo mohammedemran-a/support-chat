@@ -71,5 +71,15 @@
   "faqDescription": "Find answers to frequently asked questions",
   "chatWelcome": "Hello! How can I help you today?",
   "botTyping": "Bot is typing...",
-  "newChatStarted": "New chat started"
+  "newChatStarted": "New chat started",
+  "name": "Name",
+  "enterName": "Enter your name",
+  "confirmPassword": "Confirm Password",
+  "createAccount": "Create a new account",
+  "alreadyHaveAccount": "Already have an account?",
+  "passwordMismatch": "Passwords do not match",
+  "passwordMinLength": "Password must be at least 6 characters",
+  "emailAlreadyRegistered": "This email is already registered",
+  "registrationError": "Error creating account",
+  "registrationSuccess": "Account created successfully! Please check your email to confirm your account"
 }

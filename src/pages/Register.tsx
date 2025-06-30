@@ -26,12 +26,12 @@ const RegisterForm = () => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
-      toast.error(t('passwordMismatch') || 'كلمات المرور غير متطابقة');
+      toast.error(t('passwordMismatch') || 'Passwords do not match');
       return;
     }
 
     if (formData.password.length < 6) {
-      toast.error('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      toast.error(t('passwordMinLength') || 'Password must be at least 6 characters');
       return;
     }
 
@@ -54,18 +54,18 @@ const RegisterForm = () => {
       if (error) {
         console.error('Registration error:', error);
         if (error.message.includes('already registered')) {
-          toast.error('هذا البريد الإلكتروني مسجل بالفعل');
+          toast.error(t('emailAlreadyRegistered') || 'This email is already registered');
         } else {
-          toast.error(error.message || 'خطأ في إنشاء الحساب');
+          toast.error(error.message || t('registrationError') || 'Error creating account');
         }
         return;
       }
 
-      toast.success('تم إنشاء الحساب بنجاح! يرجى التحقق من بريدك الإلكتروني لتأكيد الحساب');
+      toast.success(t('registrationSuccess') || 'Account created successfully! Please check your email to confirm your account');
       navigate('/login');
     } catch (error: any) {
       console.error('Registration error:', error);
-      toast.error('خطأ في إنشاء الحساب');
+      toast.error(t('registrationError') || 'Error creating account');
     } finally {
       setIsLoading(false);
     }
@@ -76,16 +76,16 @@ const RegisterForm = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">{t('register')}</CardTitle>
-          <CardDescription>{t('createAccount') || 'إنشاء حساب جديد'}</CardDescription>
+          <CardDescription>{t('createAccount')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">{t('name') || 'الاسم'}</Label>
+              <Label htmlFor="name">{t('name')}</Label>
               <Input
                 id="name"
                 type="text"
-                placeholder={t('enterName') || 'أدخل الاسم'}
+                placeholder={t('enterName')}
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                 required
@@ -93,11 +93,11 @@ const RegisterForm = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">{t('email') || 'البريد الإلكتروني'}</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder={t('enterEmail') || 'أدخل البريد الإلكتروني'}
+                placeholder={t('enterEmail')}
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                 required
@@ -105,11 +105,11 @@ const RegisterForm = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">{t('password') || 'كلمة المرور'}</Label>
+              <Label htmlFor="password">{t('password')}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder={t('enterPassword') || 'أدخل كلمة المرور'}
+                placeholder={t('enterPassword')}
                 value={formData.password}
                 onChange={(e) => setFormData({...formData, password: e.target.value})}
                 required
@@ -118,11 +118,11 @@ const RegisterForm = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">{t('confirmPassword') || 'تأكيد كلمة المرور'}</Label>
+              <Label htmlFor="confirmPassword">{t('confirmPassword')}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
-                placeholder={t('confirmPassword') || 'تأكيد كلمة المرور'}
+                placeholder={t('confirmPassword')}
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                 required
@@ -135,12 +135,12 @@ const RegisterForm = () => {
               className="w-full bg-brand-gradient hover:opacity-90"
               disabled={isLoading}
             >
-              {isLoading ? (t('loading') || 'جاري التحميل...') : (t('register') || 'إنشاء حساب')}
+              {isLoading ? t('loading') : t('register')}
             </Button>
 
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                {t('alreadyHaveAccount') || 'لديك حساب بالفعل؟'}{' '}
+                {t('alreadyHaveAccount')}{' '}
                 <button
                   type="button"
                   onClick={() => navigate('/login')}
