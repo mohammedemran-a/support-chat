@@ -2,17 +2,22 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Languages, Moon, Sun, Bell, Shield, User } from 'lucide-react';
 import { toast } from 'sonner';
 
 const SettingsContent = () => {
-  const { t, language, toggleLanguage } = useLanguage();
+  const { t, i18n } = useTranslation();
 
   const handleSaveSettings = () => {
     toast.success(t('settingsSaved') || 'تم حفظ الإعدادات بنجاح');
+  };
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'ar' ? 'en' : 'ar';
+    i18n.changeLanguage(newLang);
   };
 
   return (
@@ -46,7 +51,7 @@ const SettingsContent = () => {
                     {t('currentLanguage') || 'اللغة الحالية'}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {language === 'ar' ? 'العربية' : 'English'}
+                    {i18n.language === 'ar' ? 'العربية' : 'English'}
                   </p>
                 </div>
                 <Button
@@ -55,7 +60,7 @@ const SettingsContent = () => {
                   className="flex items-center space-x-2"
                 >
                   <Languages className="h-4 w-4" />
-                  <span>{language === 'ar' ? 'English' : 'العربية'}</span>
+                  <span>{i18n.language === 'ar' ? 'English' : 'العربية'}</span>
                 </Button>
               </div>
             </CardContent>
@@ -181,15 +186,13 @@ const SettingsContent = () => {
 
 const Settings = () => {
   return (
-    <LanguageProvider>
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1">
-          <SettingsContent />
-        </main>
-        <Footer />
-      </div>
-    </LanguageProvider>
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1">
+        <SettingsContent />
+      </main>
+      <Footer />
+    </div>
   );
 };
 

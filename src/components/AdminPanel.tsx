@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useProfiles, useUpdateUserRole, UserProfile } from '@/hooks/useProfiles';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { Shield, Users, UserCheck } from 'lucide-react';
 
 const AdminPanel = () => {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const { data: profiles, isLoading } = useProfiles();
   const updateUserRole = useUpdateUserRole();
   const [selectedRoles, setSelectedRoles] = useState<Record<string, string>>({});
