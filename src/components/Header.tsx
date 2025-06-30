@@ -58,16 +58,14 @@ const Header = () => {
             >
               {t('home')}
             </Link>
-            {isAuthenticated && (
-              <Link 
-                to="/chat" 
-                className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-brand-blue-50 ${
-                  location.pathname === '/chat' ? 'text-brand-blue-600 bg-brand-blue-50' : ''
-                }`}
-              >
-                {t('chat')}
-              </Link>
-            )}
+            <Link 
+              to="/chat" 
+              className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-brand-blue-50 ${
+                location.pathname === '/chat' ? 'text-brand-blue-600 bg-brand-blue-50' : ''
+              }`}
+            >
+              {t('chat')}
+            </Link>
             {userProfile?.role === 'admin' && (
               <Link 
                 to="/admin" 
@@ -161,16 +159,14 @@ const Header = () => {
               >
                 {t('home')}
               </Link>
-              {isAuthenticated && (
-                <Link 
-                  to="/chat" 
-                  className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-brand-blue-50 ${
-                    location.pathname === '/chat' ? 'text-brand-blue-600 bg-brand-blue-50' : ''
-                  }`}
-                >
-                  {t('chat')}
-                </Link>
-              )}
+              <Link 
+                to="/chat" 
+                className={`text-gray-700 hover:text-brand-blue-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-brand-blue-50 ${
+                  location.pathname === '/chat' ? 'text-brand-blue-600 bg-brand-blue-50' : ''
+                }`}
+              >
+                {t('chat')}
+              </Link>
               {userProfile?.role === 'admin' && (
                 <Link 
                   to="/admin" 
