@@ -107,7 +107,6 @@ const Header = () => {
                 <div className="flex items-center space-x-2">
                   <div className="flex items-center space-x-2 px-3 py-2 bg-gray-100 rounded-lg">
                     <UserIcon className="w-4 h-4 text-gray-600" />
-                    <span className="text-sm text-gray-700">{user?.email}</span>
                     {userProfile?.role === 'admin' && (
                       <Shield className="w-4 h-4 text-red-600" />
                     )}
