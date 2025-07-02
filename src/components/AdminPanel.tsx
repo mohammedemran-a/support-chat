@@ -68,47 +68,6 @@ const AdminPanel = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <Users className="w-8 h-8 text-blue-600" />
-              <div>
-                <p className="text-sm text-gray-600">إجمالي المستخدمين</p>
-                <p className="text-2xl font-bold">{profiles?.length || 0}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <Shield className="w-8 h-8 text-red-600" />
-              <div>
-                <p className="text-sm text-gray-600">المشرفين</p>
-                <p className="text-2xl font-bold">
-                  {profiles?.filter(p => p.role === 'admin').length || 0}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <UserCheck className="w-8 h-8 text-green-600" />
-              <div>
-                <p className="text-sm text-gray-600">وكلاء الدعم</p>
-                <p className="text-2xl font-bold">
-                  {profiles?.filter(p => p.role === 'support_agent').length || 0}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
       <Card>
         <CardHeader>
