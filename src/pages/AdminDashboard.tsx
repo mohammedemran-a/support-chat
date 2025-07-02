@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { useCurrentUserProfile } from '@/hooks/useProfiles';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import AdminPanel from '@/components/AdminPanel';
+import AdminDashboardComponent from '@/components/AdminDashboard';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
@@ -95,7 +95,7 @@ const AdminDashboard = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8">
-        <AdminPanel />
+        <AdminDashboardComponent />
       </main>
       <Footer />
     </div>
