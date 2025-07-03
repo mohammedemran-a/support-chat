@@ -203,56 +203,6 @@ const AdminDashboard = () => {
 
             {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-6">
-              {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-blue-600">إجمالي المستخدمين</p>
-                        <p className="text-3xl font-bold text-blue-900">{stats.totalUsers}</p>
-                      </div>
-                      <Users className="w-8 h-8 text-blue-600" />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-red-600">المشرفين</p>
-                        <p className="text-3xl font-bold text-red-900">{stats.admins}</p>
-                      </div>
-                      <Shield className="w-8 h-8 text-red-600" />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-green-600">وكلاء الدعم</p>
-                        <p className="text-3xl font-bold text-green-900">{stats.supportAgents}</p>
-                      </div>
-                      <UserCheck className="w-8 h-8 text-green-600" />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-purple-600">المستخدمين العاديين</p>
-                        <p className="text-3xl font-bold text-purple-900">{stats.regularUsers}</p>
-                      </div>
-                      <Users className="w-8 h-8 text-purple-600" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
 
               {/* Quick Actions */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -347,6 +297,57 @@ const AdminDashboard = () => {
                     <h1 className="text-2xl font-bold text-gray-900">لوحة إدارة المستخدمين</h1>
                     <p className="text-gray-600">إدارة أدوار المستخدمين وصلاحياتهم</p>
                   </div>
+                </div>
+
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-blue-600">إجمالي المستخدمين</p>
+                          <p className="text-3xl font-bold text-blue-900">{stats.totalUsers}</p>
+                        </div>
+                        <Users className="w-8 h-8 text-blue-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-red-600">المشرفين</p>
+                          <p className="text-3xl font-bold text-red-900">{stats.admins}</p>
+                        </div>
+                        <Shield className="w-8 h-8 text-red-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-green-600">وكلاء الدعم</p>
+                          <p className="text-3xl font-bold text-green-900">{stats.supportAgents}</p>
+                        </div>
+                        <UserCheck className="w-8 h-8 text-green-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-purple-600">المستخدمين العاديين</p>
+                          <p className="text-3xl font-bold text-purple-900">{stats.regularUsers}</p>
+                        </div>
+                        <Users className="w-8 h-8 text-purple-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
 
                 <Card>
