@@ -32,7 +32,7 @@ const AdminDashboard = () => {
   const { data: profiles, isLoading: profilesLoading } = useProfiles();
   const updateUserRole = useUpdateUserRole();
   const [selectedRoles, setSelectedRoles] = useState<Record<string, string>>({});
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('users');
   const navigate = useNavigate();
 
   // Admin Panel functions
@@ -178,11 +178,7 @@ const AdminDashboard = () => {
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="overview" className="flex items-center space-x-2">
-                <BarChart3 className="w-4 h-4" />
-                <span>نظرة عامة</span>
-              </TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="users" className="flex items-center space-x-2">
                 <Users className="w-4 h-4" />
                 <span>إدارة المستخدمين</span>
@@ -191,102 +187,11 @@ const AdminDashboard = () => {
                 <MessageSquare className="w-4 h-4" />
                 <span>المحادثات</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center space-x-2">
-                <TrendingUp className="w-4 h-4" />
-                <span>التحليلات</span>
-              </TabsTrigger>
-              <TabsTrigger value="settings" className="flex items-center space-x-2">
-                <Settings className="w-4 h-4" />
-                <span>الإعدادات</span>
+              <TabsTrigger value="faq" className="flex items-center space-x-2">
+                <FileText className="w-4 h-4" />
+                <span>الأسئلة الشائعة</span>
               </TabsTrigger>
             </TabsList>
-
-            {/* Overview Tab */}
-            <TabsContent value="overview" className="space-y-6">
-
-              {/* Quick Actions */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Activity className="w-5 h-5" />
-                      <span>نشاط النظام</span>
-                    </CardTitle>
-                    <CardDescription>
-                      مراقبة حالة النظام والأداء
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">حالة الخادم</span>
-                        <Badge variant="default" className="bg-green-100 text-green-800">
-                          متصل
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">قاعدة البيانات</span>
-                        <Badge variant="default" className="bg-green-100 text-green-800">
-                          نشطة
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">آخر تحديث</span>
-                        <span className="text-sm text-gray-500">قبل دقائق قليلة</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Database className="w-5 h-5" />
-                      <span>إدارة قاعدة البيانات</span>
-                    </CardTitle>
-                    <CardDescription>
-                      عرض وإدارة بيانات النظام
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <Button variant="outline" className="w-full justify-start">
-                        <FileText className="w-4 h-4 mr-2" />
-                        عرض السجلات
-                      </Button>
-                      <Button variant="outline" className="w-full justify-start">
-                        <Database className="w-4 h-4 mr-2" />
-                        إعدادات قاعدة البيانات
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Settings className="w-5 h-5" />
-                      <span>إعدادات سريعة</span>
-                    </CardTitle>
-                    <CardDescription>
-                      الوصول السريع للإعدادات المهمة
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <Button variant="outline" className="w-full justify-start">
-                        <Shield className="w-4 h-4 mr-2" />
-                        إعدادات الأمان
-                      </Button>
-                      <Button variant="outline" className="w-full justify-start">
-                        <Users className="w-4 h-4 mr-2" />
-                        إعدادات المستخدمين
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
 
             {/* Users Management Tab */}
             <TabsContent value="users">
@@ -432,40 +337,32 @@ const AdminDashboard = () => {
               </Card>
             </TabsContent>
 
-            {/* Analytics Tab */}
-            <TabsContent value="analytics">
-              <Card>
-                <CardHeader>
-                  <CardTitle>التحليلات والتقارير</CardTitle>
-                  <CardDescription>
-                    إحصائيات مفصلة حول استخدام النظام
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-8 text-gray-500">
-                    <TrendingUp className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>سيتم إضافة التحليلات والتقارير قريباً</p>
+            {/* FAQ Tab */}
+            <TabsContent value="faq">
+              <div className="space-y-6">
+                <div className="flex items-center space-x-3">
+                  <FileText className="w-8 h-8 text-brand-blue-600" />
+                  <div>
+                    <h1 className="text-2xl font-bold text-gray-900">إدارة الأسئلة الشائعة</h1>
+                    <p className="text-gray-600">إضافة وإدارة الأسئلة الشائعة باللغتين العربية والإنجليزية</p>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                </div>
 
-            {/* Settings Tab */}
-            <TabsContent value="settings">
-              <Card>
-                <CardHeader>
-                  <CardTitle>إعدادات النظام</CardTitle>
-                  <CardDescription>
-                    إدارة الإعدادات العامة للنظام
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-8 text-gray-500">
-                    <Settings className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>سيتم إضافة إعدادات النظام قريباً</p>
-                  </div>
-                </CardContent>
-              </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>إضافة سؤال جديد</CardTitle>
+                    <CardDescription>
+                      يمكنك إضافة الأسئلة والأجوبة باللغة العربية والإنجليزية
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-8 text-gray-500">
+                      <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>سيتم إضافة نموذج الأسئلة الشائعة قريباً</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
