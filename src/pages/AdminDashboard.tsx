@@ -10,6 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { useTranslation } from 'react-i18next';
 import { 
   Shield, 
@@ -33,7 +36,47 @@ const AdminDashboard = () => {
   const updateUserRole = useUpdateUserRole();
   const [selectedRoles, setSelectedRoles] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState('users');
+  
+  // FAQ form state
+  const [faqForm, setFaqForm] = useState({
+    questionAr: '',
+    answerAr: '',
+    questionEn: '',
+    answerEn: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+
+  // FAQ functions
+  const handleFaqFormChange = (field: string, value: string) => {
+    setFaqForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFaqSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      // TODO: Add API call to save FAQ
+      console.log('FAQ form submitted:', faqForm);
+      
+      // Reset form after successful submission
+      setFaqForm({
+        questionAr: '',
+        answerAr: '',
+        questionEn: '',
+        answerEn: ''
+      });
+      
+      // You can add toast notification here
+      alert('تم إضافة السؤال بنجاح!');
+    } catch (error) {
+      console.error('Error submitting FAQ:', error);
+      alert('حدث خطأ أثناء إضافة السؤال');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Admin Panel functions
   const handleRoleChange = (userId: string, newRole: string) => {
@@ -196,13 +239,6 @@ const AdminDashboard = () => {
             {/* Users Management Tab */}
             <TabsContent value="users">
               <div className="space-y-6">
-                <div className="flex items-center space-x-3">
-                  <Shield className="w-8 h-8 text-brand-blue-600" />
-                  <div>
-                    <h1 className="text-2xl font-bold text-gray-900">لوحة إدارة المستخدمين</h1>
-                    <p className="text-gray-600">إدارة أدوار المستخدمين وصلاحياتهم</p>
-                  </div>
-                </div>
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -356,10 +392,92 @@ const AdminDashboard = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-center py-8 text-gray-500">
-                      <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p>سيتم إضافة نموذج الأسئلة الشائعة قريباً</p>
-                    </div>
+                    <form onSubmit={handleFaqSubmit} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Arabic Section */}
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold text-gray-900">النسخة العربية</h3>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="questionAr">السؤال بالعربية</Label>
+                            <Input
+                              id="questionAr"
+                              value={faqForm.questionAr}
+                              onChange={(e) => handleFaqFormChange('questionAr', e.target.value)}
+                              placeholder="اكتب السؤال باللغة العربية..."
+                              required
+                              dir="rtl"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="answerAr">الإجابة بالعربية</Label>
+                            <Textarea
+                              id="answerAr"
+                              value={faqForm.answerAr}
+                              onChange={(e) => handleFaqFormChange('answerAr', e.target.value)}
+                              placeholder="اكتب الإجابة باللغة العربية..."
+                              rows={4}
+                              required
+                              dir="rtl"
+                            />
+                          </div>
+                        </div>
+
+                        {/* English Section */}
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold text-gray-900">English Version</h3>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="questionEn">Question in English</Label>
+                            <Input
+                              id="questionEn"
+                              value={faqForm.questionEn}
+                              onChange={(e) => handleFaqFormChange('questionEn', e.target.value)}
+                              placeholder="Write the question in English..."
+                              required
+                              dir="ltr"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="answerEn">Answer in English</Label>
+                            <Textarea
+                              id="answerEn"
+                              value={faqForm.answerEn}
+                              onChange={(e) => handleFaqFormChange('answerEn', e.target.value)}
+                              placeholder="Write the answer in English..."
+                              rows={4}
+                              required
+                              dir="ltr"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end space-x-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setFaqForm({
+                            questionAr: '',
+                            answerAr: '',
+                            questionEn: '',
+                            answerEn: ''
+                          })}
+                          disabled={isSubmitting}
+                        >
+                          إعادة تعيين
+                        </Button>
+                        <Button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="min-w-[120px]"
+                        >
+                          {isSubmitting ? 'جاري الحفظ...' : 'حفظ السؤال'}
+                        </Button>
+                      </div>
+                    </form>
                   </CardContent>
                 </Card>
               </div>
