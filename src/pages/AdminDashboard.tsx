@@ -14,18 +14,20 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useTranslation } from 'react-i18next';
+import { useConversations, useDeleteConversation } from '@/hooks/useConversations';
+import { useAddKnowledgeBaseItem } from '@/hooks/useKnowledgeBaseAdmin';
+import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
+import { toast } from 'sonner';
 import { 
   Shield, 
   AlertTriangle, 
   Users, 
-  BarChart3, 
-  Settings, 
   MessageSquare, 
   UserCheck,
-  Database,
-  Activity,
   FileText,
-  TrendingUp
+  Trash2,
+  Calendar,
+  Clock
 } from 'lucide-react';
 
 const AdminDashboard = () => {
@@ -34,6 +36,16 @@ const AdminDashboard = () => {
   const { data: userProfile, isLoading: profileLoading, error: profileError } = useCurrentUserProfile();
   const { data: profiles, isLoading: profilesLoading } = useProfiles();
   const updateUserRole = useUpdateUserRole();
+  
+  // Conversations hooks
+  const { data: conversations, isLoading: conversationsLoading } = useConversations();
+  const deleteConversation = useDeleteConversation();
+  
+  // Knowledge base hooks
+  const { data: knowledgeBaseAr } = useKnowledgeBase('ar');
+  const { data: knowledgeBaseEn } = useKnowledgeBase('en');
+  const addKnowledgeBaseItem = useAddKnowledgeBaseItem();
+  
   const [selectedRoles, setSelectedRoles] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState('users');
   
@@ -44,7 +56,6 @@ const AdminDashboard = () => {
     questionEn: '',
     answerEn: ''
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   // FAQ functions
@@ -54,28 +65,22 @@ const AdminDashboard = () => {
 
   const handleFaqSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     
-    try {
-      // TODO: Add API call to save FAQ
-      console.log('FAQ form submitted:', faqForm);
-      
-      // Reset form after successful submission
-      setFaqForm({
-        questionAr: '',
-        answerAr: '',
-        questionEn: '',
-        answerEn: ''
-      });
-      
-      // You can add toast notification here
-      alert('تم إضافة السؤال بنجاح!');
-    } catch (error) {
-      console.error('Error submitting FAQ:', error);
-      alert('حدث خطأ أثناء إضافة السؤال');
-    } finally {
-      setIsSubmitting(false);
+    if (!faqForm.questionAr || !faqForm.answerAr || !faqForm.questionEn || !faqForm.answerEn) {
+      toast.error('يرجى ملء جميع الحقول');
+      return;
     }
+
+    addKnowledgeBaseItem.mutate(faqForm, {
+      onSuccess: () => {
+        setFaqForm({
+          questionAr: '',
+          answerAr: '',
+          questionEn: '',
+          answerEn: ''
+        });
+      }
+    });
   };
 
   // Admin Panel functions
@@ -365,10 +370,52 @@ const AdminDashboard = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-8 text-gray-500">
-                    <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>سيتم إضافة إدارة المحادثات قريباً</p>
-                  </div>
+                  {conversationsLoading ? (
+                    <div className="flex items-center justify-center p-8">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600">جاري تحميل المحادثات...</p>
+                      </div>
+                    </div>
+                  ) : conversations && conversations.length > 0 ? (
+                    <div className="space-y-4">
+                      {conversations.map((conversation) => (
+                        <div key={conversation.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center space-x-4">
+                            <MessageSquare className="w-8 h-8 text-brand-blue-600" />
+                            <div>
+                              <h3 className="font-medium">{conversation.title || 'محادثة بدون عنوان'}</h3>
+                              <p className="text-sm text-gray-600">{conversation.profile?.name} - {conversation.profile?.email}</p>
+                              <div className="flex items-center space-x-2 text-xs text-gray-500 mt-1">
+                                <Calendar className="w-3 h-3" />
+                                <span>{new Date(conversation.created_at).toLocaleDateString('ar-SA')}</span>
+                                <Clock className="w-3 h-3 ml-2" />
+                                <span>{new Date(conversation.created_at).toLocaleTimeString('ar-SA')}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Badge variant={conversation.status === 'active' ? 'default' : 'secondary'}>
+                              {conversation.status === 'active' ? 'نشطة' : 'مكتملة'}
+                            </Badge>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => deleteConversation.mutate(conversation.id)}
+                              disabled={deleteConversation.isPending}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>لا توجد محادثات حالياً</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -465,19 +512,94 @@ const AdminDashboard = () => {
                             questionEn: '',
                             answerEn: ''
                           })}
-                          disabled={isSubmitting}
+                          disabled={addKnowledgeBaseItem.isPending}
                         >
                           إعادة تعيين
                         </Button>
                         <Button
                           type="submit"
-                          disabled={isSubmitting}
+                          disabled={addKnowledgeBaseItem.isPending}
                           className="min-w-[120px]"
                         >
-                          {isSubmitting ? 'جاري الحفظ...' : 'حفظ السؤال'}
+                          {addKnowledgeBaseItem.isPending ? 'جاري الحفظ...' : 'حفظ السؤال'}
                         </Button>
                       </div>
                     </form>
+                  </CardContent>
+                </Card>
+
+                {/* Current Knowledge Base */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>قاعدة المعرفة الحالية</CardTitle>
+                    <CardDescription>
+                      عرض وإدارة الأسئلة الموجودة في قاعدة المعرفة
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Arabic Knowledge Base */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold text-gray-900">الأسئلة العربية ({knowledgeBaseAr?.length || 0})</h3>
+                        <div className="space-y-3 max-h-96 overflow-y-auto">
+                          {knowledgeBaseAr?.map((item) => (
+                            <div key={item.id} className="p-4 border rounded-lg space-y-2">
+                              <div className="flex items-start justify-between">
+                                <h4 className="font-medium text-right" dir="rtl">{item.question}</h4>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-600 hover:text-red-800"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                              <p className="text-sm text-gray-600 text-right" dir="rtl">{item.answer}</p>
+                              <div className="text-xs text-gray-400">
+                                {new Date(item.created_at).toLocaleDateString('ar-SA')}
+                              </div>
+                            </div>
+                          ))}
+                          {(!knowledgeBaseAr || knowledgeBaseAr.length === 0) && (
+                            <div className="text-center py-8 text-gray-500">
+                              <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                              <p>لا توجد أسئلة باللغة العربية</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* English Knowledge Base */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold text-gray-900">English Questions ({knowledgeBaseEn?.length || 0})</h3>
+                        <div className="space-y-3 max-h-96 overflow-y-auto">
+                          {knowledgeBaseEn?.map((item) => (
+                            <div key={item.id} className="p-4 border rounded-lg space-y-2">
+                              <div className="flex items-start justify-between">
+                                <h4 className="font-medium text-left" dir="ltr">{item.question}</h4>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-600 hover:text-red-800"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                              <p className="text-sm text-gray-600 text-left" dir="ltr">{item.answer}</p>
+                              <div className="text-xs text-gray-400">
+                                {new Date(item.created_at).toLocaleDateString('en-US')}
+                              </div>
+                            </div>
+                          ))}
+                          {(!knowledgeBaseEn || knowledgeBaseEn.length === 0) && (
+                            <div className="text-center py-8 text-gray-500">
+                              <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                              <p>No English questions available</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               </div>

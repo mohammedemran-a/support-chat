@@ -11,61 +11,30 @@ export type Database = {
     Tables: {
       conversations: {
         Row: {
-          created_at: string | null
-          end_time: string | null
+          created_at: string
           id: string
-          intent_id: string | null
-          start_time: string | null
-          status: string
-          support_agent_id: string | null
-          updated_at: string | null
+          status: string | null
+          title: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
-          created_at?: string | null
-          end_time?: string | null
+          created_at?: string
           id?: string
-          intent_id?: string | null
-          start_time?: string | null
-          status?: string
-          support_agent_id?: string | null
-          updated_at?: string | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
-          created_at?: string | null
-          end_time?: string | null
+          created_at?: string
           id?: string
-          intent_id?: string | null
-          start_time?: string | null
-          status?: string
-          support_agent_id?: string | null
-          updated_at?: string | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "conversations_intent_id_fkey"
-            columns: ["intent_id"]
-            isOneToOne: false
-            referencedRelation: "intents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversations_support_agent_id_fkey"
-            columns: ["support_agent_id"]
-            isOneToOne: false
-            referencedRelation: "support_agents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversations_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       intents: {
         Row: {
@@ -119,26 +88,26 @@ export type Database = {
         Row: {
           content: string
           conversation_id: string
-          created_at: string | null
+          created_at: string
           id: string
-          sender: string
-          timestamp: string | null
+          role: string
+          user_id: string | null
         }
         Insert: {
           content: string
           conversation_id: string
-          created_at?: string | null
+          created_at?: string
           id?: string
-          sender: string
-          timestamp?: string | null
+          role: string
+          user_id?: string | null
         }
         Update: {
           content?: string
           conversation_id?: string
-          created_at?: string | null
+          created_at?: string
           id?: string
-          sender?: string
-          timestamp?: string | null
+          role?: string
+          user_id?: string | null
         }
         Relationships: [
           {
