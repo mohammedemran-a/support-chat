@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useTranslation } from 'react-i18next';
 import { useConversations, useDeleteConversation } from '@/hooks/useConversations';
-import { useAddKnowledgeBaseItem } from '@/hooks/useKnowledgeBaseAdmin';
+import { useAddKnowledgeBaseItem, useDeleteKnowledgeBaseItem } from '@/hooks/useKnowledgeBaseAdmin';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { toast } from 'sonner';
 import { 
@@ -45,6 +45,7 @@ const AdminDashboard = () => {
   const { data: knowledgeBaseAr } = useKnowledgeBase('ar');
   const { data: knowledgeBaseEn } = useKnowledgeBase('en');
   const addKnowledgeBaseItem = useAddKnowledgeBaseItem();
+  const deleteKnowledgeBaseItem = useDeleteKnowledgeBaseItem();
   
   const [selectedRoles, setSelectedRoles] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState('users');
@@ -237,7 +238,7 @@ const AdminDashboard = () => {
               </TabsTrigger>
               <TabsTrigger value="faq" className="flex items-center space-x-2">
                 <FileText className="w-4 h-4" />
-                <span>الأسئلة الشائعة</span>
+                <span>الأسئلة</span>
               </TabsTrigger>
             </TabsList>
 
@@ -426,8 +427,8 @@ const AdminDashboard = () => {
                 <div className="flex items-center space-x-3">
                   <FileText className="w-8 h-8 text-brand-blue-600" />
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-900">إدارة الأسئلة الشائعة</h1>
-                    <p className="text-gray-600">إضافة وإدارة الأسئلة الشائعة باللغتين العربية والإنجليزية</p>
+                    <h1 className="text-2xl font-bold text-gray-900">إدارة الأسئلة</h1>
+                    <p className="text-gray-600">إضافة وإدارة الأسئلة باللغتين العربية والإنجليزية</p>
                   </div>
                 </div>
 
@@ -550,6 +551,8 @@ const AdminDashboard = () => {
                                   variant="ghost"
                                   size="sm"
                                   className="text-red-600 hover:text-red-800"
+                                  onClick={() => deleteKnowledgeBaseItem.mutate(item.id)}
+                                  disabled={deleteKnowledgeBaseItem.isPending}
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
@@ -581,6 +584,8 @@ const AdminDashboard = () => {
                                   variant="ghost"
                                   size="sm"
                                   className="text-red-600 hover:text-red-800"
+                                  onClick={() => deleteKnowledgeBaseItem.mutate(item.id)}
+                                  disabled={deleteKnowledgeBaseItem.isPending}
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
