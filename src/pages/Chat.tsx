@@ -4,10 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useChatBot } from '@/hooks/useChatBot';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Menu, Send, Settings, LogOut, MessageSquare, User, Plus, Loader2, Phone } from 'lucide-react';
+import { useConversations, useConversationMessages, useDeleteConversation, type Conversation as DBConversation, type Message as DBMessage } from '@/hooks/useConversations';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { Menu, Send, Settings, LogOut, MessageSquare, User, Plus, Loader2, Phone, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -19,20 +22,16 @@ interface Message {
   timestamp: Date;
 }
 
-interface Conversation {
-  id: string;
-  title: string;
-  lastMessage: string;
-  timestamp: Date;
-}
-
 const Chat = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { generateBotResponse, isTyping } = useChatBot(i18n.language);
   const isMobile = useIsMobile();
+  const { user } = useAuth();
   const [showTransferDialog, setShowTransferDialog] = useState(false);
   
+  // State for current conversation
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -44,20 +43,84 @@ const Chat = () => {
   const [inputMessage, setInputMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const conversations: Conversation[] = [
-    {
-      id: '1',
-      title: i18n.language === 'ar' ? 'استفسار عن القيود المحاسبية' : 'Accounting Entries Inquiry',
-      lastMessage: i18n.language === 'ar' ? 'شكراً لك على المساعدة' : 'Thank you for the help',
-      timestamp: new Date(Date.now() - 86400000)
-    },
-    {
-      id: '2',
-      title: i18n.language === 'ar' ? 'حساب الضريبة المضافة' : 'VAT Calculation',
-      lastMessage: i18n.language === 'ar' ? 'كيف أحسب الضريبة؟' : 'How do I calculate VAT?',
-      timestamp: new Date(Date.now() - 172800000)
+  // Hooks for data fetching
+  const { data: conversations = [], isLoading: conversationsLoading } = useConversations();
+  const { data: conversationMessages = [], isLoading: messagesLoading } = useConversationMessages(currentConversationId || '');
+  const deleteConversationMutation = useDeleteConversation();
+
+  // Convert DB messages to UI messages format
+  const convertMessagesToUI = (dbMessages: DBMessage[]): Message[] => {
+    return dbMessages.map(msg => ({
+      id: msg.id,
+      text: msg.content,
+      sender: msg.role === 'user' ? 'user' : 'bot',
+      timestamp: new Date(msg.created_at)
+    }));
+  };
+
+  // Load messages when conversation changes
+  useEffect(() => {
+    if (currentConversationId && conversationMessages.length > 0) {
+      setMessages(convertMessagesToUI(conversationMessages));
+    } else if (!currentConversationId) {
+      // Show welcome message for new chat
+      setMessages([
+        {
+          id: '1',
+          text: t('chatWelcome'),
+          sender: 'bot',
+          timestamp: new Date()
+        }
+      ]);
     }
-  ];
+  }, [conversationMessages, currentConversationId, t]);
+
+  // Save message to database
+  const saveMessageToDB = async (content: string, role: 'user' | 'assistant', conversationId?: string) => {
+    if (!user) return null;
+
+    let activeConversationId = conversationId;
+
+    // Create new conversation if none exists
+    if (!activeConversationId) {
+      const { data: newConversation, error: convError } = await supabase
+        .from('conversations')
+        .insert({
+          user_id: user.id,
+          title: content.slice(0, 50) + (content.length > 50 ? '...' : ''),
+          status: 'active'
+        })
+        .select()
+        .single();
+
+      if (convError) {
+        console.error('Error creating conversation:', convError);
+        return null;
+      }
+
+      activeConversationId = newConversation.id;
+      setCurrentConversationId(activeConversationId);
+    }
+
+    // Save message
+    const { data: message, error: msgError } = await supabase
+      .from('messages')
+      .insert({
+        conversation_id: activeConversationId,
+        user_id: user.id,
+        content,
+        role
+      })
+      .select()
+      .single();
+
+    if (msgError) {
+      console.error('Error saving message:', msgError);
+      return null;
+    }
+
+    return message;
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -69,16 +132,18 @@ const Chat = () => {
 
   // تحديث رسالة الترحيب عند تغيير اللغة
   useEffect(() => {
-    setMessages(prev => prev.map((msg, index) => 
-      index === 0 && msg.sender === 'bot' 
-        ? { ...msg, text: t('chatWelcome') }
-        : msg
-    ));
-  }, [i18n.language, t]);
+    if (!currentConversationId) {
+      setMessages(prev => prev.map((msg, index) => 
+        index === 0 && msg.sender === 'bot' 
+          ? { ...msg, text: t('chatWelcome') }
+          : msg
+      ));
+    }
+  }, [i18n.language, t, currentConversationId]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputMessage.trim() || isTyping) return;
+    if (!inputMessage.trim() || isTyping || !user) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -88,12 +153,19 @@ const Chat = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const messageText = inputMessage;
     setInputMessage('');
+
+    // Save user message to database
+    await saveMessageToDB(messageText, 'user', currentConversationId);
 
     // إنتاج رد ذكي من البوت
     try {
-      const botResponse = await generateBotResponse(inputMessage);
+      const botResponse = await generateBotResponse(messageText);
       setMessages(prev => [...prev, botResponse]);
+      
+      // Save bot response to database
+      await saveMessageToDB(botResponse.text, 'assistant', currentConversationId);
     } catch (error) {
       console.error('Error generating bot response:', error);
       const errorMessage: Message = {
@@ -105,6 +177,9 @@ const Chat = () => {
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
+      
+      // Save error message to database
+      await saveMessageToDB(errorMessage.text, 'assistant', currentConversationId);
     }
   };
 
@@ -130,6 +205,7 @@ const Chat = () => {
   };
 
   const handleNewChat = () => {
+    setCurrentConversationId(null);
     setMessages([
       {
         id: '1',
@@ -139,6 +215,28 @@ const Chat = () => {
       }
     ]);
     toast.success(t('newChatStarted'));
+  };
+
+  const handleSelectConversation = (conversationId: string) => {
+    setCurrentConversationId(conversationId);
+  };
+
+  const handleDeleteConversation = async (conversationId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm(i18n.language === 'ar' ? 'هل تريد حذف هذه المحادثة؟' : 'Are you sure you want to delete this conversation?')) {
+      await deleteConversationMutation.mutateAsync(conversationId);
+      if (currentConversationId === conversationId) {
+        setCurrentConversationId(null);
+        setMessages([
+          {
+            id: '1',
+            text: t('chatWelcome'),
+            sender: 'bot',
+            timestamp: new Date()
+          }
+        ]);
+      }
+    }
   };
 
   return (
@@ -193,34 +291,64 @@ const Chat = () => {
                     </Button>
                   </div>
 
-                  {/* Previous Conversations */}
-                  <div className="space-y-3">
-                    <h3 className="font-medium text-gray-900">
-                      {t('previousChats')}
-                    </h3>
-                    <div className="space-y-2">
-                      {conversations.map((conv) => (
-                        <Card key={conv.id} className="cursor-pointer hover:bg-gray-50">
-                          <CardContent className="p-3">
-                            <div className="flex items-start space-x-3">
-                              <MessageSquare className="h-4 w-4 mt-1 text-gray-400" />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-900 truncate">
-                                  {conv.title}
-                                </p>
-                                <p className="text-xs text-gray-500 truncate">
-                                  {conv.lastMessage}
-                                </p>
-                                <p className="text-xs text-gray-400">
-                                  {conv.timestamp.toLocaleDateString()}
-                                </p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
+                   {/* Previous Conversations */}
+                   <div className="space-y-3">
+                     <h3 className="font-medium text-gray-900">
+                       {t('previousChats')}
+                     </h3>
+                     <div className="space-y-2">
+                       {conversationsLoading ? (
+                         <div className="flex justify-center p-4">
+                           <Loader2 className="w-4 h-4 animate-spin" />
+                         </div>
+                       ) : conversations.length > 0 ? (
+                         conversations.map((conv) => (
+                           <Card 
+                             key={conv.id} 
+                             className={`cursor-pointer hover:bg-gray-50 ${
+                               currentConversationId === conv.id ? 'bg-blue-50 border-blue-200' : ''
+                             }`}
+                             onClick={() => handleSelectConversation(conv.id)}
+                           >
+                             <CardContent className="p-3">
+                               <div className="flex items-start space-x-3">
+                                 <MessageSquare className="h-4 w-4 mt-1 text-gray-400 flex-shrink-0" />
+                                 <div className="flex-1 min-w-0">
+                                   <p className="text-sm font-medium text-gray-900 truncate">
+                                     {conv.title || (i18n.language === 'ar' ? 'محادثة بدون عنوان' : 'Untitled Conversation')}
+                                   </p>
+                                   <p className="text-xs text-gray-400">
+                                     {new Date(conv.created_at).toLocaleDateString(
+                                       i18n.language === 'ar' ? 'ar-SA' : 'en-US',
+                                       { 
+                                         year: 'numeric', 
+                                         month: 'short', 
+                                         day: 'numeric',
+                                         hour: '2-digit',
+                                         minute: '2-digit'
+                                       }
+                                     )}
+                                   </p>
+                                 </div>
+                                 <Button
+                                   variant="ghost"
+                                   size="sm"
+                                   className="p-1 h-6 w-6 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                   onClick={(e) => handleDeleteConversation(conv.id, e)}
+                                 >
+                                   <Trash2 className="h-3 w-3" />
+                                 </Button>
+                               </div>
+                             </CardContent>
+                           </Card>
+                         ))
+                       ) : (
+                         <p className="text-sm text-gray-500 text-center py-4">
+                           {i18n.language === 'ar' ? 'لا توجد محادثات سابقة' : 'No previous conversations'}
+                         </p>
+                       )}
+                     </div>
+                   </div>
                 </div>
               </SheetContent>
             </Sheet>
@@ -311,6 +439,9 @@ const Chat = () => {
             <DialogTitle className="text-center">
               {i18n.language === 'ar' ? 'التحويل إلى موظف الدعم' : 'Transfer to Support Agent'}
             </DialogTitle>
+            <DialogDescription className="text-center text-sm text-gray-600">
+              {i18n.language === 'ar' ? 'للحصول على مساعدة فورية من فريق الدعم' : 'For immediate assistance from our support team'}
+            </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center space-y-4 py-4">
             <Phone className="h-12 w-12 text-brand-blue-600" />
