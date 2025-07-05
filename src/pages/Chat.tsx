@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useChatBot } from '@/hooks/useChatBot';
-import { Menu, Send, Settings, LogOut, MessageSquare, User, Plus, Loader2 } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Menu, Send, Settings, LogOut, MessageSquare, User, Plus, Loader2, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +30,8 @@ const Chat = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { generateBotResponse, isTyping } = useChatBot(i18n.language);
+  const isMobile = useIsMobile();
+  const [showTransferDialog, setShowTransferDialog] = useState(false);
   
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -105,7 +109,15 @@ const Chat = () => {
   };
 
   const handleTransferToHuman = () => {
-    toast.success(t('transferringToHuman'));
+    const supportNumber = "01337571";
+    
+    if (isMobile) {
+      // فتح دليل الهاتف للاتصال
+      window.location.href = `tel:${supportNumber}`;
+    } else {
+      // عرض نافذة مصغرة للكمبيوتر
+      setShowTransferDialog(true);
+    }
   };
 
   const handleLogout = () => {
@@ -291,6 +303,41 @@ const Chat = () => {
           </form>
         </div>
       </div>
+
+      {/* Transfer to Human Dialog for Desktop */}
+      <Dialog open={showTransferDialog} onOpenChange={setShowTransferDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-center">
+              {i18n.language === 'ar' ? 'التحويل إلى موظف الدعم' : 'Transfer to Support Agent'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-y-4 py-4">
+            <Phone className="h-12 w-12 text-brand-blue-600" />
+            <div className="text-center space-y-2">
+              <p className="text-lg font-medium">
+                {i18n.language === 'ar' ? 'يرجى الاتصال على الرقم المجاني' : 'Please call our toll-free number'}
+              </p>
+              <div className="bg-gray-100 rounded-lg p-4">
+                <p className="text-2xl font-bold text-brand-blue-600" dir="ltr">
+                  01337571
+                </p>
+              </div>
+              <p className="text-sm text-gray-600">
+                {i18n.language === 'ar' 
+                  ? 'متاح 24/7 لخدمتكم' 
+                  : 'Available 24/7 to serve you'}
+              </p>
+            </div>
+            <Button 
+              onClick={() => setShowTransferDialog(false)}
+              className="w-full bg-brand-gradient hover:opacity-90"
+            >
+              {i18n.language === 'ar' ? 'حسناً' : 'OK'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
