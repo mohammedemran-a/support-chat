@@ -62,6 +62,7 @@ export type Database = {
           answer: string
           created_at: string | null
           id: string
+          is_frequent: boolean
           language_code: string
           question: string
           updated_at: string | null
@@ -70,6 +71,7 @@ export type Database = {
           answer: string
           created_at?: string | null
           id?: string
+          is_frequent?: boolean
           language_code: string
           question: string
           updated_at?: string | null
@@ -78,6 +80,7 @@ export type Database = {
           answer?: string
           created_at?: string | null
           id?: string
+          is_frequent?: boolean
           language_code?: string
           question?: string
           updated_at?: string | null

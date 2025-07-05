@@ -12,10 +12,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useTranslation } from 'react-i18next';
 import { useConversations, useDeleteConversation } from '@/hooks/useConversations';
-import { useAddKnowledgeBaseItem, useDeleteKnowledgeBaseItem } from '@/hooks/useKnowledgeBaseAdmin';
+import { useAddKnowledgeBaseItem, useDeleteKnowledgeBaseItem, useToggleFrequentQuestion } from '@/hooks/useKnowledgeBaseAdmin';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { toast } from 'sonner';
 import { 
@@ -46,6 +47,7 @@ const AdminDashboard = () => {
   const { data: knowledgeBaseEn } = useKnowledgeBase('en');
   const addKnowledgeBaseItem = useAddKnowledgeBaseItem();
   const deleteKnowledgeBaseItem = useDeleteKnowledgeBaseItem();
+  const toggleFrequentQuestion = useToggleFrequentQuestion();
   
   const [selectedRoles, setSelectedRoles] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState('users');
@@ -543,26 +545,46 @@ const AdminDashboard = () => {
                       <div className="space-y-4">
                         <h3 className="text-lg font-semibold text-gray-900">الأسئلة العربية ({knowledgeBaseAr?.length || 0})</h3>
                         <div className="space-y-3 max-h-96 overflow-y-auto">
-                          {knowledgeBaseAr?.map((item) => (
-                            <div key={item.id} className="p-4 border rounded-lg space-y-2">
-                              <div className="flex items-start justify-between">
-                                <h4 className="font-medium text-right" dir="rtl">{item.question}</h4>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-red-600 hover:text-red-800"
-                                  onClick={() => deleteKnowledgeBaseItem.mutate(item.id)}
-                                  disabled={deleteKnowledgeBaseItem.isPending}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                              <p className="text-sm text-gray-600 text-right" dir="rtl">{item.answer}</p>
-                              <div className="text-xs text-gray-400">
-                                {new Date(item.created_at).toLocaleDateString('ar-SA')}
-                              </div>
-                            </div>
-                          ))}
+                           {knowledgeBaseAr?.map((item) => (
+                             <div key={item.id} className="p-4 border rounded-lg space-y-2">
+                               <div className="flex items-start justify-between">
+                                 <div className="flex-1">
+                                   <div className="flex items-center gap-2 mb-1">
+                                     <h4 className="font-medium text-right" dir="rtl">{item.question}</h4>
+                                     {item.is_frequent && (
+                                       <Badge variant="secondary" className="text-xs">شائع</Badge>
+                                     )}
+                                   </div>
+                                   <p className="text-sm text-gray-600 text-right" dir="rtl">{item.answer}</p>
+                                   <div className="text-xs text-gray-400">
+                                     {new Date(item.created_at).toLocaleDateString('ar-SA')}
+                                   </div>
+                                 </div>
+                                 <div className="flex items-center space-x-2 ml-2">
+                                   <div className="flex items-center space-x-2">
+                                     <Label htmlFor={`frequent-ar-${item.id}`} className="text-xs">شائع</Label>
+                                     <Switch
+                                       id={`frequent-ar-${item.id}`}
+                                       checked={item.is_frequent}
+                                       onCheckedChange={(checked) => 
+                                         toggleFrequentQuestion.mutate({ id: item.id, isFrequent: checked })
+                                       }
+                                       disabled={toggleFrequentQuestion.isPending}
+                                     />
+                                   </div>
+                                   <Button
+                                     variant="ghost"
+                                     size="sm"
+                                     className="text-red-600 hover:text-red-800"
+                                     onClick={() => deleteKnowledgeBaseItem.mutate(item.id)}
+                                     disabled={deleteKnowledgeBaseItem.isPending}
+                                   >
+                                     <Trash2 className="w-4 h-4" />
+                                   </Button>
+                                 </div>
+                               </div>
+                             </div>
+                           ))}
                           {(!knowledgeBaseAr || knowledgeBaseAr.length === 0) && (
                             <div className="text-center py-8 text-gray-500">
                               <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -576,26 +598,46 @@ const AdminDashboard = () => {
                       <div className="space-y-4">
                         <h3 className="text-lg font-semibold text-gray-900">English Questions ({knowledgeBaseEn?.length || 0})</h3>
                         <div className="space-y-3 max-h-96 overflow-y-auto">
-                          {knowledgeBaseEn?.map((item) => (
-                            <div key={item.id} className="p-4 border rounded-lg space-y-2">
-                              <div className="flex items-start justify-between">
-                                <h4 className="font-medium text-left" dir="ltr">{item.question}</h4>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-red-600 hover:text-red-800"
-                                  onClick={() => deleteKnowledgeBaseItem.mutate(item.id)}
-                                  disabled={deleteKnowledgeBaseItem.isPending}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                              <p className="text-sm text-gray-600 text-left" dir="ltr">{item.answer}</p>
-                              <div className="text-xs text-gray-400">
-                                {new Date(item.created_at).toLocaleDateString('en-US')}
-                              </div>
-                            </div>
-                          ))}
+                           {knowledgeBaseEn?.map((item) => (
+                             <div key={item.id} className="p-4 border rounded-lg space-y-2">
+                               <div className="flex items-start justify-between">
+                                 <div className="flex-1">
+                                   <div className="flex items-center gap-2 mb-1">
+                                     <h4 className="font-medium text-left" dir="ltr">{item.question}</h4>
+                                     {item.is_frequent && (
+                                       <Badge variant="secondary" className="text-xs">Frequent</Badge>
+                                     )}
+                                   </div>
+                                   <p className="text-sm text-gray-600 text-left" dir="ltr">{item.answer}</p>
+                                   <div className="text-xs text-gray-400">
+                                     {new Date(item.created_at).toLocaleDateString('en-US')}
+                                   </div>
+                                 </div>
+                                 <div className="flex items-center space-x-2 ml-2">
+                                   <div className="flex items-center space-x-2">
+                                     <Label htmlFor={`frequent-en-${item.id}`} className="text-xs">Frequent</Label>
+                                     <Switch
+                                       id={`frequent-en-${item.id}`}
+                                       checked={item.is_frequent}
+                                       onCheckedChange={(checked) => 
+                                         toggleFrequentQuestion.mutate({ id: item.id, isFrequent: checked })
+                                       }
+                                       disabled={toggleFrequentQuestion.isPending}
+                                     />
+                                   </div>
+                                   <Button
+                                     variant="ghost"
+                                     size="sm"
+                                     className="text-red-600 hover:text-red-800"
+                                     onClick={() => deleteKnowledgeBaseItem.mutate(item.id)}
+                                     disabled={deleteKnowledgeBaseItem.isPending}
+                                   >
+                                     <Trash2 className="w-4 h-4" />
+                                   </Button>
+                                 </div>
+                               </div>
+                             </div>
+                           ))}
                           {(!knowledgeBaseEn || knowledgeBaseEn.length === 0) && (
                             <div className="text-center py-8 text-gray-500">
                               <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />

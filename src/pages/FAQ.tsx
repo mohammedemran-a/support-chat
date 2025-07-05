@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { useKnowledgeBase, useSearchKnowledgeBase } from '@/hooks/useKnowledgeBase';
+import { useKnowledgeBase, useSearchKnowledgeBase, useFrequentQuestions } from '@/hooks/useKnowledgeBase';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Search, Loader2 } from 'lucide-react';
@@ -13,15 +13,15 @@ const FAQ = () => {
   const { t, i18n } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
 
-  // جلب جميع الأسئلة الشائعة من قاعدة البيانات
-  const { data: allFaqs = [], isLoading: loadingAll } = useKnowledgeBase(i18n.language);
+  // جلب الأسئلة الشائعة فقط من قاعدة البيانات
+  const { data: frequentFaqs = [], isLoading: loadingFrequent } = useFrequentQuestions(i18n.language);
   
   // البحث في قاعدة البيانات
   const { data: searchResults = [], isLoading: loadingSearch } = useSearchKnowledgeBase(searchTerm, i18n.language);
 
-  // استخدام نتائج البحث إذا كان هناك بحث، وإلا استخدام جميع الأسئلة
-  const displayedFaqs = searchTerm.trim() ? searchResults : allFaqs;
-  const isLoading = searchTerm.trim() ? loadingSearch : loadingAll;
+  // استخدام نتائج البحث إذا كان هناك بحث، وإلا استخدام الأسئلة الشائعة فقط
+  const displayedFaqs = searchTerm.trim() ? searchResults : frequentFaqs;
+  const isLoading = searchTerm.trim() ? loadingSearch : loadingFrequent;
 
   return (
     <div className="min-h-screen flex flex-col">

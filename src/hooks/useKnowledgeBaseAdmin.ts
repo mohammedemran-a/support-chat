@@ -68,10 +68,36 @@ export const useDeleteKnowledgeBaseItem = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['knowledge-base'] });
+      queryClient.invalidateQueries({ queryKey: ['frequent-questions'] });
       toast.success('تم حذف السؤال بنجاح');
     },
     onError: (error: any) => {
       toast.error('خطأ في حذف السؤال: ' + error.message);
+    },
+  });
+};
+
+export const useToggleFrequentQuestion = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, isFrequent }: { id: string; isFrequent: boolean }) => {
+      const { error } = await supabase
+        .from('knowledge_base')
+        .update({ is_frequent: isFrequent })
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['knowledge-base'] });
+      queryClient.invalidateQueries({ queryKey: ['frequent-questions'] });
+      toast.success('تم تحديث حالة السؤال بنجاح');
+    },
+    onError: (error: any) => {
+      toast.error('خطأ في تحديث السؤال: ' + error.message);
     },
   });
 };

@@ -7,6 +7,7 @@ interface KnowledgeBaseItem {
   question: string;
   answer: string;
   language_code: string;
+  is_frequent: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -29,6 +30,33 @@ export const useKnowledgeBase = (languageCode: string) => {
       }
 
       console.log('Fetched knowledge base items:', data?.length);
+      return data as KnowledgeBaseItem[];
+    },
+    staleTime: 1000 * 60 * 30, // Cache for 30 minutes
+    gcTime: 1000 * 60 * 60, // Keep in cache for 1 hour
+  });
+};
+
+// Hook للحصول على الأسئلة الشائعة فقط
+export const useFrequentQuestions = (languageCode: string) => {
+  return useQuery({
+    queryKey: ['frequent-questions', languageCode],
+    queryFn: async () => {
+      console.log('Fetching frequent questions for language:', languageCode);
+      
+      const { data, error } = await supabase
+        .from('knowledge_base')
+        .select('*')
+        .eq('language_code', languageCode)
+        .eq('is_frequent', true)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching frequent questions:', error);
+        throw error;
+      }
+
+      console.log('Fetched frequent questions:', data?.length);
       return data as KnowledgeBaseItem[];
     },
     staleTime: 1000 * 60 * 30, // Cache for 30 minutes
