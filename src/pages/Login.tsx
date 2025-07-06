@@ -89,41 +89,72 @@ const LoginForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.email || !formData.password) {
+      toast.error('يرجى ملء جميع الحقول');
+      return;
+    }
+
     setIsLoading(true);
     
-    try {
-      console.log('🔐 Login attempt for:', formData.email);
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
+    // إضافة retry mechanism
+    const maxRetries = 3;
+    let retryCount = 0;
+    
+    while (retryCount < maxRetries) {
+      try {
+        console.log(`🔐 Login attempt ${retryCount + 1} for:`, formData.email);
+        
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: formData.email.trim(),
+          password: formData.password,
+        });
 
-      console.log('🔐 Login result:', { user: data.user?.id, error });
+        console.log('🔐 Login result:', { user: data.user?.id, error });
 
-      if (error) {
-        console.error('❌ Login error:', error);
-        if (error.message.includes('Invalid login credentials')) {
-          toast.error('بيانات الدخول غير صحيحة');
-        } else if (error.message.includes('Email not confirmed')) {
-          toast.error('يرجى تأكيد بريدك الإلكتروني أولاً');
-        } else {
-          toast.error(error.message || 'خطأ في تسجيل الدخول');
+        if (error) {
+          console.error('❌ Login error:', error);
+          
+          // معالجة أنواع مختلفة من الأخطاء
+          if (error.message.includes('Invalid login credentials')) {
+            toast.error('بيانات الدخول غير صحيحة. تأكد من البريد الإلكتروني وكلمة المرور');
+            break; // لا نعيد المحاولة للبيانات الخاطئة
+          } else if (error.message.includes('Email not confirmed')) {
+            toast.error('يرجى تأكيد بريدك الإلكتروني أولاً');
+            break;
+          } else if (error.message.includes('network') || error.message.includes('timeout')) {
+            retryCount++;
+            if (retryCount < maxRetries) {
+              toast.error(`خطأ في الشبكة. إعادة المحاولة ${retryCount}/${maxRetries}`);
+              await new Promise(resolve => setTimeout(resolve, 2000)); // انتظار ثانيتين
+              continue;
+            } else {
+              toast.error('خطأ في الاتصال. يرجى التحقق من الإنترنت والمحاولة مرة أخرى');
+            }
+          } else {
+            toast.error(error.message || 'خطأ في تسجيل الدخول');
+          }
+          break;
         }
-        return;
-      }
 
-      if (data.user) {
-        console.log('✅ Login successful for user:', data.user.id);
-        toast.success(t('loginSuccess') || 'تم تسجيل الدخول بنجاح');
-        // Role check and navigation will be handled by the auth state change listener
+        if (data.user) {
+          console.log('✅ Login successful for user:', data.user.id);
+          toast.success(t('loginSuccess') || 'تم تسجيل الدخول بنجاح');
+          // Role check and navigation will be handled by the auth state change listener
+          break;
+        }
+      } catch (error: any) {
+        console.error('💥 Login error:', error);
+        retryCount++;
+        if (retryCount < maxRetries) {
+          toast.error(`خطأ غير متوقع. إعادة المحاولة ${retryCount}/${maxRetries}`);
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        } else {
+          toast.error('خطأ في تسجيل الدخول. يرجى المحاولة لاحقاً');
+        }
       }
-    } catch (error: any) {
-      console.error('💥 Login error:', error);
-      toast.error('خطأ في تسجيل الدخول');
-    } finally {
-      setIsLoading(false);
     }
+    
+    setIsLoading(false);
   };
 
   return (

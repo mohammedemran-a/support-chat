@@ -14,6 +14,7 @@ import { Menu, Send, Settings, LogOut, MessageSquare, User, Plus, Loader2, Phone
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface Message {
   id: string;
@@ -28,6 +29,7 @@ const Chat = () => {
   const { generateBotResponse, isTyping } = useChatBot(i18n.language);
   const isMobile = useIsMobile();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [showTransferDialog, setShowTransferDialog] = useState(false);
   
   // State for current conversation
@@ -145,27 +147,39 @@ const Chat = () => {
     e.preventDefault();
     if (!inputMessage.trim() || isTyping || !user) return;
 
+    const messageText = inputMessage;
+    setInputMessage('');
+
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: inputMessage,
+      text: messageText,
       sender: 'user',
       timestamp: new Date()
     };
 
+    // إضافة الرسالة فوراً للواجهة
     setMessages(prev => [...prev, userMessage]);
-    const messageText = inputMessage;
-    setInputMessage('');
 
-    // Save user message to database
-    await saveMessageToDB(messageText, 'user', currentConversationId);
-
-    // إنتاج رد ذكي من البوت
     try {
+      // حفظ رسالة المستخدم في قاعدة البيانات أولاً
+      const savedUserMessage = await saveMessageToDB(messageText, 'user', currentConversationId);
+      
+      // إذا تم إنشاء محادثة جديدة، نحديث الـ ID
+      if (savedUserMessage && !currentConversationId) {
+        // تحديث query للحصول على المحادثات الجديدة
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      }
+
+      // إنتاج رد ذكي من البوت
       const botResponse = await generateBotResponse(messageText);
       setMessages(prev => [...prev, botResponse]);
       
-      // Save bot response to database
+      // حفظ رد البوت في قاعدة البيانات
       await saveMessageToDB(botResponse.text, 'assistant', currentConversationId);
+      
+      // تحديث المحادثات بعد إضافة الرسائل
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      
     } catch (error) {
       console.error('Error generating bot response:', error);
       const errorMessage: Message = {
@@ -178,8 +192,12 @@ const Chat = () => {
       };
       setMessages(prev => [...prev, errorMessage]);
       
-      // Save error message to database
-      await saveMessageToDB(errorMessage.text, 'assistant', currentConversationId);
+      // حفظ رسالة الخطأ في قاعدة البيانات
+      try {
+        await saveMessageToDB(errorMessage.text, 'assistant', currentConversationId);
+      } catch (saveError) {
+        console.error('Error saving error message:', saveError);
+      }
     }
   };
 
@@ -195,9 +213,20 @@ const Chat = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    window.location.href = '/';
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error signing out:', error);
+        toast.error('خطأ في تسجيل الخروج');
+      } else {
+        toast.success('تم تسجيل الخروج بنجاح');
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+      toast.error('خطأ في تسجيل الخروج');
+    }
   };
 
   const handleGoToSettings = () => {

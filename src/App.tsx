@@ -11,6 +11,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import FAQ from "./pages/FAQ";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
 import './i18n'; // استيراد إعداد i18n
 
 const queryClient = new QueryClient();
@@ -31,11 +32,11 @@ function App() {
     },
     {
       path: "/chat",
-      element: <Chat />,
+      element: <ProtectedRoute><Chat /></ProtectedRoute>,
     },
     {
       path: "/admin",
-      element: <AdminDashboard />,
+      element: <ProtectedRoute><AdminDashboard /></ProtectedRoute>,
     },
     {
       path: "/faq",
@@ -43,7 +44,7 @@ function App() {
     },
     {
       path: "/settings",
-      element: <Settings />,
+      element: <ProtectedRoute><Settings /></ProtectedRoute>,
     },
     {
       path: "*",
