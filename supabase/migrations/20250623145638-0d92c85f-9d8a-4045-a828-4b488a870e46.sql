@@ -21,19 +21,4 @@ INSERT INTO public.knowledge_base (question, answer, language_code) VALUES
 ('What is the difference between short-term and long-term debt?', 'Short-term debt consists of obligations due within one year or less, such as notes payable and accounts payable, while long-term debt is due after more than one year like long-term loans.', 'en'),
 ('How do I calculate liquidity ratios?', 'Quick ratio = (Current Assets - Inventory) ÷ Current Liabilities, and Current ratio = Current Assets ÷ Current Liabilities.', 'en');
 
--- إضافة المفاتيح الجديدة للترجمات
-INSERT INTO public.translations (key, language_code, value) VALUES
-('searchFAQ', 'ar', 'ابحث في الأسئلة الشائعة...'),
-('searchFAQ', 'en', 'Search in FAQs...'),
-('noResults', 'ar', 'لم يتم العثور على نتائج'),
-('noResults', 'en', 'No results found'),
-('faqDescription', 'ar', 'تجد هنا إجابات للأسئلة الأكثر شيوعاً حول النظام المحاسبي'),
-('faqDescription', 'en', 'Find answers to the most frequently asked questions about the accounting system'),
-('newChatStarted', 'ar', 'تم بدء محادثة جديدة'),
-('newChatStarted', 'en', 'New chat started'),
-('botTyping', 'ar', 'البوت يكتب...'),
-('botTyping', 'en', 'Bot is typing...'),
-('sendMessage', 'ar', 'إرسال'),
-('sendMessage', 'en', 'Send'),
-('chatWelcome', 'ar', 'مرحباً! أنا مساعدك الذكي للنظام المحاسبي. كيف يمكنني مساعدتك اليوم؟'),
-('chatWelcome', 'en', 'Hello! I am your smart assistant for the accounting system. How can I help you today?');
+-- تم حذف إدراج بيانات الترجمات لأنها لم تعد مستخدمة
