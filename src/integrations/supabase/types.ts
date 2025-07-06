@@ -152,66 +152,6 @@ export type Database = {
         }
         Relationships: []
       }
-      support_agents: {
-        Row: {
-          created_at: string | null
-          email: string
-          id: string
-          name: string
-          updated_at: string | null
-          uuid: string
-        }
-        Insert: {
-          created_at?: string | null
-          email: string
-          id?: string
-          name: string
-          updated_at?: string | null
-          uuid: string
-        }
-        Update: {
-          created_at?: string | null
-          email?: string
-          id?: string
-          name?: string
-          updated_at?: string | null
-          uuid?: string
-        }
-        Relationships: []
-      }
-      users: {
-        Row: {
-          created_at: string | null
-          email: string
-          id: string
-          name: string
-          password: string
-          preferred_language_code: string | null
-          updated_at: string | null
-          uuid: string
-        }
-        Insert: {
-          created_at?: string | null
-          email: string
-          id?: string
-          name: string
-          password: string
-          preferred_language_code?: string | null
-          updated_at?: string | null
-          uuid: string
-        }
-        Update: {
-          created_at?: string | null
-          email?: string
-          id?: string
-          name?: string
-          password?: string
-          preferred_language_code?: string | null
-          updated_at?: string | null
-          uuid?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never

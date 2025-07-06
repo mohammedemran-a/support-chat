@@ -32,7 +32,7 @@ export const useConversations = () => {
         .from('conversations')
         .select(`
           *,
-          profiles!conversations_user_id_fkey (
+          profiles!inner(
             name,
             email
           )
