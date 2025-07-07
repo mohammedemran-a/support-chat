@@ -279,128 +279,128 @@ const Chat = () => {
             </div>
           </div>
         </SheetContent>
-      </Sheet>
 
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                  <Menu className="w-4 h-4" />
-                </Button>
-              </SheetTrigger>
-              
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-brand-gradient rounded-full flex items-center justify-center">
-                  <MessageCircle className="w-4 h-4 text-white" />
-                </div>
-                <div>
-                  <h1 className="font-semibold text-gray-900 dark:text-white">
-                    {t('technicalSupport') || 'الدعم الفني'}
-                  </h1>
-                  <p className="text-sm text-brand-green-600 dark:text-brand-green-400">
-                    {t('onlineNow') || 'متصل الآن'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <Button
-              onClick={handleNewChat}
-              variant="outline"
-              size="sm"
-              className="hidden sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              {t('newChat') || 'محادثة جديدة'}
-            </Button>
-          </div>
-        </div>
-
-        {/* Messages Area */}
-        <ScrollArea className="flex-1 p-4">
-          <div className="max-w-4xl mx-auto space-y-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <Card className={`max-w-[80%] ${
-                  message.role === 'user'
-                    ? 'bg-brand-gradient text-white'
-                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
-                }`}>
-                  <CardContent className="p-4">
-                    <p className={`text-sm ${
-                      message.role === 'user' ? 'text-white' : 'text-gray-800 dark:text-gray-200'
-                    }`}>
-                      {message.content}
+        {/* Main Chat Area */}
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm" className="dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <Menu className="w-4 h-4" />
+                  </Button>
+                </SheetTrigger>
+                
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-brand-gradient rounded-full flex items-center justify-center">
+                    <MessageCircle className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="font-semibold text-gray-900 dark:text-white">
+                      {t('technicalSupport') || 'الدعم الفني'}
+                    </h1>
+                    <p className="text-sm text-brand-green-600 dark:text-brand-green-400">
+                      {t('onlineNow') || 'متصل الآن'}
                     </p>
-                    <span className={`text-xs mt-2 block ${
-                      message.role === 'user' 
-                        ? 'text-white/80' 
-                        : 'text-gray-500 dark:text-gray-400'
-                    }`}>
-                      {message.timestamp.toLocaleTimeString()}
-                    </span>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </div>
-            ))}
-            
-            {isLoading && (
-              <div className="flex justify-start">
-                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-2">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                      </div>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {t('botTyping') || 'البوت يكتب...'}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-        </ScrollArea>
 
-        {/* Input Area */}
-        <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
-          <div className="max-w-4xl mx-auto">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSendMessage();
-              }}
-              className="flex space-x-2"
-            >
-              <Input
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                placeholder={t('typeMessage') || 'اكتب رسالتك هنا...'}
-                disabled={isLoading}
-                className="flex-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
-              />
               <Button
-                type="submit"
-                disabled={isLoading || !inputMessage.trim()}
-                className="bg-brand-gradient hover:opacity-90"
+                onClick={handleNewChat}
+                variant="outline"
+                size="sm"
+                className="hidden sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               >
-                <Send className="w-4 h-4" />
+                <Plus className="w-4 h-4 mr-2" />
+                {t('newChat') || 'محادثة جديدة'}
               </Button>
-            </form>
+            </div>
+          </div>
+
+          {/* Messages Area */}
+          <ScrollArea className="flex-1 p-4">
+            <div className="max-w-4xl mx-auto space-y-4">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <Card className={`max-w-[80%] ${
+                    message.role === 'user'
+                      ? 'bg-brand-gradient text-white'
+                      : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                  }`}>
+                    <CardContent className="p-4">
+                      <p className={`text-sm ${
+                        message.role === 'user' ? 'text-white' : 'text-gray-800 dark:text-gray-200'
+                      }`}>
+                        {message.content}
+                      </p>
+                      <span className={`text-xs mt-2 block ${
+                        message.role === 'user' 
+                          ? 'text-white/80' 
+                          : 'text-gray-500 dark:text-gray-400'
+                      }`}>
+                        {message.timestamp.toLocaleTimeString()}
+                      </span>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+              
+              {isLoading && (
+                <div className="flex justify-start">
+                  <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                    <CardContent className="p-4">
+                      <div className="flex items-center space-x-2">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        </div>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          {t('botTyping') || 'البوت يكتب...'}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          </ScrollArea>
+
+          {/* Input Area */}
+          <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
+            <div className="max-w-4xl mx-auto">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSendMessage();
+                }}
+                className="flex space-x-2"
+              >
+                <Input
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  placeholder={t('typeMessage') || 'اكتب رسالتك هنا...'}
+                  disabled={isLoading}
+                  className="flex-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
+                />
+                <Button
+                  type="submit"
+                  disabled={isLoading || !inputMessage.trim()}
+                  className="bg-brand-gradient hover:opacity-90"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
+      </Sheet>
     </div>
   );
 };
