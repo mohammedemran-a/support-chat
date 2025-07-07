@@ -9,7 +9,7 @@ interface Message {
   timestamp: Date;
 }
 
-export const useChatBot = (language: string) => {
+export const useChatBot = (language: string = 'ar') => {
   const { data: knowledgeBase = [] } = useKnowledgeBase(language);
   const [isTyping, setIsTyping] = useState(false);
 
@@ -45,7 +45,7 @@ export const useChatBot = (language: string) => {
       : 'Sorry, I could not find a precise answer to your question. You can try rephrasing the question or contact technical support.';
   };
 
-  const generateBotResponse = async (userMessage: string): Promise<Message> => {
+  const sendMessage = async (userMessage: string): Promise<string> => {
     setIsTyping(true);
     
     // محاكاة وقت المعالجة
@@ -54,6 +54,12 @@ export const useChatBot = (language: string) => {
     const answer = findBestAnswer(userMessage);
     
     setIsTyping(false);
+    
+    return answer;
+  };
+
+  const generateBotResponse = async (userMessage: string): Promise<Message> => {
+    const answer = await sendMessage(userMessage);
     
     return {
       id: (Date.now() + 1).toString(),
@@ -64,6 +70,7 @@ export const useChatBot = (language: string) => {
   };
 
   return {
+    sendMessage,
     generateBotResponse,
     isTyping,
     setIsTyping

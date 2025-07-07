@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useChatBot } from '@/hooks/useChatBot';
-import { useConversations } from '@/hooks/useConversations';
+import { useConversationManager } from '@/hooks/useConversationManager';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
@@ -29,7 +29,7 @@ interface Message {
 }
 
 const Chat = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -39,15 +39,15 @@ const Chat = () => {
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  const { sendMessage } = useChatBot();
+  const { sendMessage } = useChatBot(i18n.language);
   const { 
     conversations, 
     createConversation, 
     saveMessage, 
     loadConversation,
     deleteConversation,
-    isLoading: conversationsLoading 
-  } = useConversations();
+    conversationsLoading 
+  } = useConversationManager();
 
   // Welcome message
   const welcomeMessage: Message = {
@@ -95,7 +95,11 @@ const Chat = () => {
 
       // Save user message
       if (conversationId) {
-        await saveMessage(conversationId, userMessage.content, 'user');
+        await saveMessage({
+          conversationId,
+          content: userMessage.content,
+          role: 'user'
+        });
       }
 
       // Get bot response
@@ -113,7 +117,11 @@ const Chat = () => {
 
       // Save bot message
       if (conversationId) {
-        await saveMessage(conversationId, botResponse, 'assistant');
+        await saveMessage({
+          conversationId,
+          content: botResponse,
+          role: 'assistant'
+        });
       }
 
       toast.success(t('messageSent') || 'تم إرسال الرسالة');
