@@ -81,5 +81,18 @@
   "passwordMinLength": "Password must be at least 6 characters",
   "emailAlreadyRegistered": "This email is already registered",
   "registrationError": "Error creating account",
-  "registrationSuccess": "Account created successfully! Please check your email to confirm your account"
+  "registrationSuccess": "Account created successfully! Please check your email to confirm your account",
+  "passwordRequirements": "Password does not meet the requirements",
+  "passwordLength": "At least 8 characters",
+  "passwordLowercase": "Lowercase letter",
+  "passwordUppercase": "Uppercase letter",
+  "passwordNumber": "Number",
+  "passwordSpecial": "Special character (!@#$...)",
+  "invalidEmail": "Invalid email address",
+  "passwordError": "Password error",
+  "retrying": "Retrying...",
+  "retry": "Retry",
+  "networkError": "Network error, please try again",
+  "newChat": "New Chat",
+  "send": "Send"
 }

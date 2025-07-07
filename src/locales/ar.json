@@ -81,5 +81,18 @@
   "passwordMinLength": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
   "emailAlreadyRegistered": "هذا البريد الإلكتروني مسجل بالفعل",
   "registrationError": "خطأ في إنشاء الحساب",
-  "registrationSuccess": "تم إنشاء الحساب بنجاح! يرجى التحقق من بريدك الإلكتروني لتأكيد الحساب"
+  "registrationSuccess": "تم إنشاء الحساب بنجاح! يرجى التحقق من بريدك الإلكتروني لتأكيد الحساب",
+  "passwordRequirements": "كلمة المرور لا تلبي المتطلبات المطلوبة",
+  "passwordLength": "8 أحرف على الأقل",
+  "passwordLowercase": "حرف صغير",
+  "passwordUppercase": "حرف كبير",
+  "passwordNumber": "رقم",
+  "passwordSpecial": "رمز خاص (!@#$...)",
+  "invalidEmail": "البريد الإلكتروني غير صالح",
+  "passwordError": "خطأ في كلمة المرور",
+  "retrying": "إعادة المحاولة...",
+  "retry": "إعادة المحاولة",
+  "networkError": "خطأ في الشبكة، يرجى المحاولة مرة أخرى",
+  "newChat": "محادثة جديدة",
+  "send": "إرسال"
 }

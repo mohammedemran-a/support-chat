@@ -1,515 +1,398 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { useChatBot } from '@/hooks/useChatBot';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useConversations, useConversationMessages, useDeleteConversation, type Conversation as DBConversation, type Message as DBMessage } from '@/hooks/useConversations';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { Menu, Send, Settings, LogOut, MessageSquare, User, Plus, Loader2, Phone, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useQueryClient } from '@tanstack/react-query';
+import { 
+  Send, 
+  Menu, 
+  MessageCircle, 
+  Plus, 
+  Trash2, 
+  Settings,
+  LogOut 
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { useChatBot } from '@/hooks/useChatBot';
+import { useConversations } from '@/hooks/useConversations';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 interface Message {
   id: string;
-  text: string;
-  sender: 'user' | 'bot';
+  role: 'user' | 'assistant';
+  content: string;
   timestamp: Date;
 }
 
 const Chat = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const { generateBotResponse, isTyping } = useChatBot(i18n.language);
-  const isMobile = useIsMobile();
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-  const [showTransferDialog, setShowTransferDialog] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  
-  // State for current conversation
-  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: t('chatWelcome'),
-      sender: 'bot',
-      timestamp: new Date()
-    }
-  ]);
+  const { user, signOut } = useAuth();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  const { sendMessage } = useChatBot();
+  const { 
+    conversations, 
+    createConversation, 
+    saveMessage, 
+    loadConversation,
+    deleteConversation,
+    isLoading: conversationsLoading 
+  } = useConversations();
 
-  // Hooks for data fetching
-  const { data: conversations = [], isLoading: conversationsLoading } = useConversations();
-  const { data: conversationMessages = [], isLoading: messagesLoading } = useConversationMessages(currentConversationId || '');
-  const deleteConversationMutation = useDeleteConversation();
-
-  // Convert DB messages to UI messages format
-  const convertMessagesToUI = (dbMessages: DBMessage[]): Message[] => {
-    return dbMessages.map(msg => ({
-      id: msg.id,
-      text: msg.content,
-      sender: msg.role === 'user' ? 'user' : 'bot',
-      timestamp: new Date(msg.created_at)
-    }));
+  // Welcome message
+  const welcomeMessage: Message = {
+    id: 'welcome',
+    role: 'assistant',
+    content: t('chatWelcome') || 'أهلاً بك! كيف يمكنني مساعدتك اليوم؟',
+    timestamp: new Date()
   };
 
-  // Load messages when conversation changes
+  // Initialize with welcome message
   useEffect(() => {
-    if (currentConversationId && conversationMessages.length > 0) {
-      setMessages(convertMessagesToUI(conversationMessages));
-    } else if (!currentConversationId) {
-      // Show welcome message for new chat only if no messages exist
-      setMessages(prev => {
-        if (prev.length === 0 || (prev.length === 1 && prev[0].sender === 'bot' && prev[0].text !== t('chatWelcome'))) {
-          return [
-            {
-              id: '1',
-              text: t('chatWelcome'),
-              sender: 'bot',
-              timestamp: new Date()
-            }
-          ];
-        }
-        return prev;
-      });
+    if (messages.length === 0) {
+      setMessages([welcomeMessage]);
     }
-  }, [conversationMessages, currentConversationId, t]);
+  }, []);
 
-  // Save message to database
-  const saveMessageToDB = async (content: string, role: 'user' | 'assistant', conversationId?: string) => {
-    if (!user) return null;
-
-    let activeConversationId = conversationId;
-
-    // Create new conversation if none exists
-    if (!activeConversationId) {
-      const { data: newConversation, error: convError } = await supabase
-        .from('conversations')
-        .insert({
-          user_id: user.id,
-          title: content.slice(0, 50) + (content.length > 50 ? '...' : ''),
-          status: 'active'
-        })
-        .select()
-        .single();
-
-      if (convError) {
-        console.error('Error creating conversation:', convError);
-        return null;
-      }
-
-      activeConversationId = newConversation.id;
-      setCurrentConversationId(activeConversationId);
-    }
-
-    // Save message
-    const { data: message, error: msgError } = await supabase
-      .from('messages')
-      .insert({
-        conversation_id: activeConversationId,
-        user_id: user.id,
-        content,
-        role
-      })
-      .select()
-      .single();
-
-    if (msgError) {
-      console.error('Error saving message:', msgError);
-      return null;
-    }
-
-    return message;
-  };
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
+  // Auto scroll to bottom
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // تحديث رسالة الترحيب عند تغيير اللغة
-  useEffect(() => {
-    if (!currentConversationId) {
-      setMessages(prev => prev.map((msg, index) => 
-        index === 0 && msg.sender === 'bot' 
-          ? { ...msg, text: t('chatWelcome') }
-          : msg
-      ));
-    }
-  }, [i18n.language, t, currentConversationId]);
-
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputMessage.trim() || isTyping || !user) return;
-
-    const messageText = inputMessage;
-    setInputMessage('');
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: messageText,
-      sender: 'user',
+      role: 'user',
+      content: inputMessage.trim(),
       timestamp: new Date()
     };
 
-    // إضافة الرسالة فوراً للواجهة مع الحفاظ على الرسائل الموجودة
-    setMessages(prev => {
-      // إذا كانت هذه أول رسالة من المستخدم، احتفظ برسالة الترحيب
-      if (!currentConversationId && prev.length === 1 && prev[0].sender === 'bot') {
-        return [...prev, userMessage];
-      }
-      return [...prev, userMessage];
-    });
+    // Add user message to UI
+    setMessages(prev => [...prev, userMessage]);
+    setInputMessage('');
+    setIsLoading(true);
 
     try {
-      // حفظ رسالة المستخدم في قاعدة البيانات أولاً
-      const savedUserMessage = await saveMessageToDB(messageText, 'user', currentConversationId);
-      
-      // إذا تم إنشاء محادثة جديدة، نحديث الـ ID ولكن لا نعيد تحميل الرسائل
-      if (savedUserMessage && !currentConversationId) {
-        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      // Create conversation if first message
+      let conversationId = currentConversationId;
+      if (!conversationId) {
+        console.log('Chat - Creating new conversation');
+        conversationId = await createConversation(inputMessage.trim().substring(0, 50));
+        setCurrentConversationId(conversationId);
       }
 
-      // إنتاج رد ذكي من البوت
-      const botResponse = await generateBotResponse(messageText);
-      setMessages(prev => [...prev, botResponse]);
+      // Save user message
+      if (conversationId) {
+        await saveMessage(conversationId, userMessage.content, 'user');
+      }
+
+      // Get bot response
+      const botResponse = await sendMessage(inputMessage.trim());
       
-      // حفظ رد البوت في قاعدة البيانات
-      await saveMessageToDB(botResponse.text, 'assistant', currentConversationId);
-      
-      // تحديث المحادثات بعد إضافة الرسائل
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
-      
-    } catch (error) {
-      console.error('Error generating bot response:', error);
-      const errorMessage: Message = {
+      const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: i18n.language === 'ar' 
-          ? 'عذراً، حدث خطأ في النظام. يرجى المحاولة مرة أخرى.'
-          : 'Sorry, a system error occurred. Please try again.',
-        sender: 'bot',
+        role: 'assistant',
+        content: botResponse,
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, errorMessage]);
-      
-      // حفظ رسالة الخطأ في قاعدة البيانات
-      try {
-        await saveMessageToDB(errorMessage.text, 'assistant', currentConversationId);
-      } catch (saveError) {
-        console.error('Error saving error message:', saveError);
+
+      // Add bot response to UI
+      setMessages(prev => [...prev, assistantMessage]);
+
+      // Save bot message
+      if (conversationId) {
+        await saveMessage(conversationId, botResponse, 'assistant');
       }
+
+      toast.success(t('messageSent') || 'تم إرسال الرسالة');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error(t('messageError') || 'خطأ في إرسال الرسالة');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleTransferToHuman = () => {
-    const supportNumber = "01337571";
-    
-    if (isMobile) {
-      // فتح دليل الهاتف للاتصال
-      window.location.href = `tel:${supportNumber}`;
-    } else {
-      // عرض نافذة مصغرة للكمبيوتر
-      setShowTransferDialog(true);
+  const handleNewChat = () => {
+    setMessages([welcomeMessage]);
+    setCurrentConversationId(null);
+    setIsSidebarOpen(false);
+    toast.success(t('newChatStarted') || 'تم بدء محادثة جديدة');
+  };
+
+  const handleLoadConversation = async (conversationId: string) => {
+    try {
+      const conversationMessages = await loadConversation(conversationId);
+      const formattedMessages: Message[] = [
+        welcomeMessage,
+        ...conversationMessages.map(msg => ({
+          id: msg.id,
+          role: msg.role as 'user' | 'assistant',
+          content: msg.content,
+          timestamp: new Date(msg.created_at)
+        }))
+      ];
+      
+      setMessages(formattedMessages);
+      setCurrentConversationId(conversationId);
+      setIsSidebarOpen(false);
+    } catch (error) {
+      console.error('Error loading conversation:', error);
+      toast.error(t('loadConversationError') || 'خطأ في تحميل المحادثة');
+    }
+  };
+
+  const handleDeleteConversation = async (conversationId: string) => {
+    try {
+      await deleteConversation(conversationId);
+      if (currentConversationId === conversationId) {
+        handleNewChat();
+      }
+      toast.success(t('conversationDeleted') || 'تم حذف المحادثة');
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+      toast.error(t('deleteConversationError') || 'خطأ في حذف المحادثة');
     }
   };
 
   const handleLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Error signing out:', error);
-        toast.error('خطأ في تسجيل الخروج');
-      } else {
-        toast.success('تم تسجيل الخروج بنجاح');
-        navigate('/');
-      }
+      await signOut();
+      navigate('/');
+      toast.success(t('logoutSuccess') || 'تم تسجيل الخروج بنجاح');
     } catch (error) {
-      console.error('Error during logout:', error);
-      toast.error('خطأ في تسجيل الخروج');
-    }
-  };
-
-  const handleGoToSettings = () => {
-    navigate('/settings');
-  };
-
-  const handleNewChat = () => {
-    setCurrentConversationId(null);
-    setMessages([
-      {
-        id: '1',
-        text: t('chatWelcome'),
-        sender: 'bot',
-        timestamp: new Date()
-      }
-    ]);
-    setSidebarOpen(false); // إخفاء القائمة الجانبية
-    toast.success(t('newChatStarted'));
-  };
-
-  const handleSelectConversation = (conversationId: string) => {
-    setCurrentConversationId(conversationId);
-  };
-
-  const handleDeleteConversation = async (conversationId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (window.confirm(i18n.language === 'ar' ? 'هل تريد حذف هذه المحادثة؟' : 'Are you sure you want to delete this conversation?')) {
-      await deleteConversationMutation.mutateAsync(conversationId);
-      if (currentConversationId === conversationId) {
-        setCurrentConversationId(null);
-        setMessages([
-          {
-            id: '1',
-            text: t('chatWelcome'),
-            sender: 'bot',
-            timestamp: new Date()
-          }
-        ]);
-      }
+      console.error('Logout error:', error);
+      toast.error(t('logoutError') || 'خطأ في تسجيل الخروج');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
-        {/* Chat Header */}
-        <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-80">
-                <SheetHeader>
-                  <SheetTitle>{t('menu')}</SheetTitle>
-                </SheetHeader>
-                <div className="mt-6 space-y-4">
-                  {/* New Chat Button */}
-                  <div className="space-y-3">
-                    <Button
-                      onClick={handleNewChat}
-                      className="w-full bg-brand-gradient text-white hover:opacity-90"
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      {i18n.language === 'ar' ? 'محادثة جديدة' : 'New Chat'}
-                    </Button>
-                  </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
+      {/* Mobile Sidebar */}
+      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+        <SheetContent side="left" className="w-80 dark:bg-gray-800 dark:border-gray-700">
+          <SheetHeader>
+            <SheetTitle className="dark:text-white">{t('menu') || 'القائمة'}</SheetTitle>
+          </SheetHeader>
+          
+          <div className="flex flex-col h-full">
+            {/* New Chat Button */}
+            <Button
+              onClick={handleNewChat}
+              className="w-full mb-4 bg-brand-gradient hover:opacity-90"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              {t('newChat') || 'محادثة جديدة'}
+            </Button>
 
-                  {/* Settings and Actions */}
-                  <div className="space-y-3">
-                    <h3 className="font-medium text-gray-900">
-                      {t('actions')}
-                    </h3>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={handleGoToSettings}
-                    >
-                      <Settings className="mr-2 h-4 w-4" />
-                      {t('settings')}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-red-600 hover:text-red-700"
-                      onClick={handleLogout}
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      {t('logout')}
-                    </Button>
+            {/* Previous Conversations */}
+            <div className="flex-1 overflow-hidden">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                {t('previousChats') || 'المحادثات السابقة'}
+              </h3>
+              
+              <ScrollArea className="h-[400px]">
+                {conversationsLoading ? (
+                  <div className="text-center text-gray-500 dark:text-gray-400 py-4">
+                    {t('loading') || 'جار التحميل...'}
                   </div>
+                ) : conversations.length === 0 ? (
+                  <div className="text-center text-gray-500 dark:text-gray-400 py-4">
+                    {t('noConversations') || 'لا توجد محادثات سابقة'}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {conversations.map((conversation) => (
+                      <div
+                        key={conversation.id}
+                        className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
+                          currentConversationId === conversation.id
+                            ? 'bg-brand-blue-50 border-brand-blue-200 dark:bg-gray-700 dark:border-gray-600'
+                            : 'bg-white border-gray-200 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600'
+                        }`}
+                      >
+                        <button
+                          onClick={() => handleLoadConversation(conversation.id)}
+                          className="flex-1 text-left"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <MessageCircle className="w-4 h-4 text-brand-blue-600 dark:text-brand-blue-400" />
+                            <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              {conversation.title || t('untitledChat') || 'محادثة بلا عنوان'}
+                            </span>
+                          </div>
+                        </button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteConversation(conversation.id)}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
+            </div>
 
-                   {/* Previous Conversations */}
-                   <div className="space-y-3">
-                     <h3 className="font-medium text-gray-900">
-                       {t('previousChats')}
-                     </h3>
-                     <div className="space-y-2">
-                       {conversationsLoading ? (
-                         <div className="flex justify-center p-4">
-                           <Loader2 className="w-4 h-4 animate-spin" />
-                         </div>
-                       ) : conversations.length > 0 ? (
-                         conversations.map((conv) => (
-                           <Card 
-                             key={conv.id} 
-                             className={`cursor-pointer hover:bg-gray-50 ${
-                               currentConversationId === conv.id ? 'bg-blue-50 border-blue-200' : ''
-                             }`}
-                             onClick={() => handleSelectConversation(conv.id)}
-                           >
-                             <CardContent className="p-3">
-                               <div className="flex items-start space-x-3">
-                                 <MessageSquare className="h-4 w-4 mt-1 text-gray-400 flex-shrink-0" />
-                                 <div className="flex-1 min-w-0">
-                                   <p className="text-sm font-medium text-gray-900 truncate">
-                                     {conv.title || (i18n.language === 'ar' ? 'محادثة بدون عنوان' : 'Untitled Conversation')}
-                                   </p>
-                                   <p className="text-xs text-gray-400">
-                                     {new Date(conv.created_at).toLocaleDateString(
-                                       i18n.language === 'ar' ? 'ar-SA' : 'en-US',
-                                       { 
-                                         year: 'numeric', 
-                                         month: 'short', 
-                                         day: 'numeric',
-                                         hour: '2-digit',
-                                         minute: '2-digit'
-                                       }
-                                     )}
-                                   </p>
-                                 </div>
-                                 <Button
-                                   variant="ghost"
-                                   size="sm"
-                                   className="p-1 h-6 w-6 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                   onClick={(e) => handleDeleteConversation(conv.id, e)}
-                                 >
-                                   <Trash2 className="h-3 w-3" />
-                                 </Button>
-                               </div>
-                             </CardContent>
-                           </Card>
-                         ))
-                       ) : (
-                         <p className="text-sm text-gray-500 text-center py-4">
-                           {i18n.language === 'ar' ? 'لا توجد محادثات سابقة' : 'No previous conversations'}
-                         </p>
-                       )}
-                     </div>
-                   </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-            
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900">
-                {t('technicalSupport')}
-              </h1>
-              <p className="text-sm text-gray-500">
-                {t('onlineNow')}
-              </p>
+            {/* Bottom Actions */}
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+              <Button
+                variant="outline"
+                onClick={() => navigate('/settings')}
+                className="w-full justify-start dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                {t('settings') || 'الإعدادات'}
+              </Button>
+              
+              <Button
+                variant="outline"
+                onClick={handleLogout}
+                className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                {t('logout') || 'تسجيل الخروج'}
+              </Button>
             </div>
           </div>
+        </SheetContent>
+      </Sheet>
 
-          <Button
-            onClick={handleTransferToHuman}
-            variant="outline"
-            size="sm"
-            className="text-brand-blue-600 border-brand-blue-600 hover:bg-brand-blue-50"
-          >
-            <User className="mr-2 h-4 w-4" />
-            {t('transferToHuman')}
-          </Button>
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" className="dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                  <Menu className="w-4 h-4" />
+                </Button>
+              </SheetTrigger>
+              
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-brand-gradient rounded-full flex items-center justify-center">
+                  <MessageCircle className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <h1 className="font-semibold text-gray-900 dark:text-white">
+                    {t('technicalSupport') || 'الدعم الفني'}
+                  </h1>
+                  <p className="text-sm text-brand-green-600 dark:text-brand-green-400">
+                    {t('onlineNow') || 'متصل الآن'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleNewChat}
+              variant="outline"
+              size="sm"
+              className="hidden sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              {t('newChat') || 'محادثة جديدة'}
+            </Button>
+          </div>
         </div>
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
+        <ScrollArea className="flex-1 p-4">
+          <div className="max-w-4xl mx-auto space-y-4">
+            {messages.map((message) => (
               <div
-                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                  message.sender === 'user'
-                    ? 'bg-brand-gradient text-white'
-                    : 'bg-white border border-gray-200 text-gray-900'
-                }`}
+                key={message.id}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <p className="text-sm whitespace-pre-wrap">{message.text}</p>
-                <p className={`text-xs mt-1 ${
-                  message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
+                <Card className={`max-w-[80%] ${
+                  message.role === 'user'
+                    ? 'bg-brand-gradient text-white'
+                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
                 }`}>
-                  {message.timestamp.toLocaleTimeString()}
-                </p>
+                  <CardContent className="p-4">
+                    <p className={`text-sm ${
+                      message.role === 'user' ? 'text-white' : 'text-gray-800 dark:text-gray-200'
+                    }`}>
+                      {message.content}
+                    </p>
+                    <span className={`text-xs mt-2 block ${
+                      message.role === 'user' 
+                        ? 'text-white/80' 
+                        : 'text-gray-500 dark:text-gray-400'
+                    }`}>
+                      {message.timestamp.toLocaleTimeString()}
+                    </span>
+                  </CardContent>
+                </Card>
               </div>
-            </div>
-          ))}
-
-          {isTyping && (
-            <div className="flex justify-start">
-              <div className="bg-white border border-gray-200 rounded-lg px-4 py-2">
-                <div className="flex items-center space-x-2">
-                  <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
-                  <span className="text-sm text-gray-500">{t('botTyping')}</span>
-                </div>
+            ))}
+            
+            {isLoading && (
+              <div className="flex justify-start">
+                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  <CardContent className="p-4">
+                    <div className="flex items-center space-x-2">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        {t('botTyping') || 'البوت يكتب...'}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </ScrollArea>
 
-        {/* Message Input */}
-        <div className="bg-white border-t border-gray-200 p-4">
-          <form onSubmit={handleSendMessage} className="flex space-x-3">
-            <Input
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              placeholder={t('typeMessage')}
-              className="flex-1"
-              disabled={isTyping}
-            />
-            <Button 
-              type="submit" 
-              className="bg-brand-gradient hover:opacity-90"
-              disabled={!inputMessage.trim() || isTyping}
+        {/* Input Area */}
+        <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
+          <div className="max-w-4xl mx-auto">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSendMessage();
+              }}
+              className="flex space-x-2"
             >
-              <Send className="h-4 w-4" />
-            </Button>
-          </form>
+              <Input
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                placeholder={t('typeMessage') || 'اكتب رسالتك هنا...'}
+                disabled={isLoading}
+                className="flex-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
+              />
+              <Button
+                type="submit"
+                disabled={isLoading || !inputMessage.trim()}
+                className="bg-brand-gradient hover:opacity-90"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </form>
+          </div>
         </div>
       </div>
-
-      {/* Transfer to Human Dialog for Desktop */}
-      <Dialog open={showTransferDialog} onOpenChange={setShowTransferDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="text-center">
-              {i18n.language === 'ar' ? 'التحويل إلى موظف الدعم' : 'Transfer to Support Agent'}
-            </DialogTitle>
-            <DialogDescription className="text-center text-sm text-gray-600">
-              {i18n.language === 'ar' ? 'للحصول على مساعدة فورية من فريق الدعم' : 'For immediate assistance from our support team'}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col items-center space-y-4 py-4">
-            <Phone className="h-12 w-12 text-brand-blue-600" />
-            <div className="text-center space-y-2">
-              <p className="text-lg font-medium">
-                {i18n.language === 'ar' ? 'يرجى الاتصال على الرقم المجاني' : 'Please call our toll-free number'}
-              </p>
-              <div className="bg-gray-100 rounded-lg p-4">
-                <p className="text-2xl font-bold text-brand-blue-600" dir="ltr">
-                  01337571
-                </p>
-              </div>
-              <p className="text-sm text-gray-600">
-                {i18n.language === 'ar' 
-                  ? 'متاح 24/7 لخدمتكم' 
-                  : 'Available 24/7 to serve you'}
-              </p>
-            </div>
-            <Button 
-              onClick={() => setShowTransferDialog(false)}
-              className="w-full bg-brand-gradient hover:opacity-90"
-            >
-              {i18n.language === 'ar' ? 'حسناً' : 'OK'}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
