@@ -7,9 +7,11 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Languages, Moon, Sun, Bell, Shield, User } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTheme } from '@/hooks/useTheme';
 
 const SettingsContent = () => {
   const { t, i18n } = useTranslation();
+  const { theme, setTheme, effectiveTheme } = useTheme();
 
   const handleSaveSettings = () => {
     toast.success(t('settingsSaved') || 'تم حفظ الإعدادات بنجاح');
@@ -88,11 +90,19 @@ const SettingsContent = () => {
                   </p>
                 </div>
                 <div className="flex space-x-2">
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant={effectiveTheme === 'light' ? 'default' : 'outline'} 
+                    size="sm"
+                    onClick={() => setTheme('light')}
+                  >
                     <Sun className="h-4 w-4 mr-2" />
                     {t('light') || 'فاتح'}
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant={effectiveTheme === 'dark' ? 'default' : 'outline'} 
+                    size="sm"
+                    onClick={() => setTheme('dark')}
+                  >
                     <Moon className="h-4 w-4 mr-2" />
                     {t('dark') || 'داكن'}
                   </Button>

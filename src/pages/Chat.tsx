@@ -31,6 +31,7 @@ const Chat = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [showTransferDialog, setShowTransferDialog] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // State for current conversation
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
@@ -65,15 +66,20 @@ const Chat = () => {
     if (currentConversationId && conversationMessages.length > 0) {
       setMessages(convertMessagesToUI(conversationMessages));
     } else if (!currentConversationId) {
-      // Show welcome message for new chat
-      setMessages([
-        {
-          id: '1',
-          text: t('chatWelcome'),
-          sender: 'bot',
-          timestamp: new Date()
+      // Show welcome message for new chat only if no messages exist
+      setMessages(prev => {
+        if (prev.length === 0 || (prev.length === 1 && prev[0].sender === 'bot' && prev[0].text !== t('chatWelcome'))) {
+          return [
+            {
+              id: '1',
+              text: t('chatWelcome'),
+              sender: 'bot',
+              timestamp: new Date()
+            }
+          ];
         }
-      ]);
+        return prev;
+      });
     }
   }, [conversationMessages, currentConversationId, t]);
 
@@ -157,16 +163,21 @@ const Chat = () => {
       timestamp: new Date()
     };
 
-    // إضافة الرسالة فوراً للواجهة
-    setMessages(prev => [...prev, userMessage]);
+    // إضافة الرسالة فوراً للواجهة مع الحفاظ على الرسائل الموجودة
+    setMessages(prev => {
+      // إذا كانت هذه أول رسالة من المستخدم، احتفظ برسالة الترحيب
+      if (!currentConversationId && prev.length === 1 && prev[0].sender === 'bot') {
+        return [...prev, userMessage];
+      }
+      return [...prev, userMessage];
+    });
 
     try {
       // حفظ رسالة المستخدم في قاعدة البيانات أولاً
       const savedUserMessage = await saveMessageToDB(messageText, 'user', currentConversationId);
       
-      // إذا تم إنشاء محادثة جديدة، نحديث الـ ID
+      // إذا تم إنشاء محادثة جديدة، نحديث الـ ID ولكن لا نعيد تحميل الرسائل
       if (savedUserMessage && !currentConversationId) {
-        // تحديث query للحصول على المحادثات الجديدة
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
       }
 
@@ -243,6 +254,7 @@ const Chat = () => {
         timestamp: new Date()
       }
     ]);
+    setSidebarOpen(false); // إخفاء القائمة الجانبية
     toast.success(t('newChatStarted'));
   };
 
@@ -275,7 +287,7 @@ const Chat = () => {
         {/* Chat Header */}
         <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <Sheet>
+            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="sm">
                   <Menu className="h-5 w-5" />
